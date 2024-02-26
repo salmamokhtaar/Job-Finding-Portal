@@ -18,7 +18,7 @@ const Location = ({handleChanges}) => {
         name="test"
           />
            <InputField 
-       handleChanges={handleChanges} 
+             handleChanges={handleChanges} 
        value="seattle"  
        title="Seattle"
         name="test"

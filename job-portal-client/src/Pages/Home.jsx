@@ -3,6 +3,7 @@ import { useState,useEffect } from 'react'
 import Card from '../Components/Card'
 import Jobs from '../Pages/Jobs'
 import Sidebar from '../sidebar/Sidebar'
+import Newslatter from '../Components/Newslatter'
 const Home = () => {
   const [selectCetegory,setSelectedCetegory] = useState(null)
   const [jobs,setjobs] = useState([])
@@ -73,12 +74,23 @@ const filterItems =  jobs.filter((job)=>job.jobTitle.toLowerCase().indexOf(query
       }
       // cetegory filtering 
       if(selected){
-        filteredJobs = filteredJobs.filter(({jobLocation,maxPrice,experienceLevel,salaryType,employmentType,postingDate})=>(
-          jobLocation.toLowerCase()=== selected.toLowerCase() || 
-           parseInt(maxPrice) <= parseInt(selected) || 
-           salaryType.toLowerCase() === selected.toLowerCase() ||
-           employmentType.toLowerCase() === selected.toLower
-        ))
+        filteredJobs = filteredJobs.filter(
+          ({jobLocation,
+            maxPrice,
+            experienceLevel,
+            salaryType,
+            employmentType,
+            postingDate
+          })=>
+          jobLocation.toLowerCase() === selected.toLowerCase() || 
+        parseInt(maxPrice) <=  parseInt(selected) || 
+        postingDate >= selected ||
+        salaryType.toLowerCase() === selected.toLowerCase() || 
+        experienceLevel.toLowerCase() === selected.toLowerCase() || 
+        employmentType.toLowerCase() === selected.toLowerCase() 
+
+      
+        )
         console.log(filteredJobs)
       }
 
@@ -137,7 +149,7 @@ const filterItems =  jobs.filter((job)=>job.jobTitle.toLowerCase().indexOf(query
           }
           </div>
           {/* right side */}
-          <div className='bg-white p-4 rounded'>Right</div>
+          <div className='bg-white p-4 rounded'><Newslatter/></div>
         
         </div>
 
