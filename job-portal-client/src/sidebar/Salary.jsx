@@ -6,7 +6,7 @@ const Salary = ({handleChanges,handleClick}) => {
     <div className=''>
       <h4 className='text-lg  font-medium mb-2'>Salary</h4>
       <div className='mb-4'>
-        <Button onClickHandler={handleClick} value="" title="Hourly"/>
+        <Button onClickHandler={handleClick} value="hourly" title="Hourly"/>
         <Button onClickHandler={handleClick} value="monthly" title="Monthly"/>
         <Button  onClickHandler={handleClick} value="yearly" title="Yearly"/>
       </div>
@@ -18,26 +18,26 @@ const Salary = ({handleChanges,handleClick}) => {
 {/* condition ka home ka ayu ku jira */}
     <InputField 
        handleChanges={handleChanges} 
-       value={30} 
-       title="<30000K"
+       value={3} 
+       title=">300$"
         name="test2"
           />
             <InputField 
        handleChanges={handleChanges} 
-       value={50} 
-       title="<50000k"
+       value={5} 
+       title="<500$"
         name="test2"
           />
             <InputField 
        handleChanges={handleChanges} 
-       value={50} 
-       title="<80000k"
+       value={6} 
+       title="<600$"
         name="test2"
           />
             <InputField 
        handleChanges={handleChanges} 
-       value={50} 
-       title="<1000000k"
+       value={7} 
+       title="<700$"
         name="test2"
           />
       </div>

@@ -25,6 +25,13 @@ const WorkExperience = ({handleChanges}) => {
       name="test"
         />
     
+         <InputField
+           handleChanges={handleChanges} 
+     value="no experience"    
+     title="No Experience"
+      name="test"
+        />
+    
     </div>
   </div>
   )
