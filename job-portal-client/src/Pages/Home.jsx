@@ -112,16 +112,34 @@ const filterItems =  jobs.filter((job)=>job.jobTitle.toLowerCase().indexOf(query
   return (
     <div>
       <div >
+        
+      <div className=' mt-10 flex justify-around pt-6'>
+          <div className='bg-orange-200 w-[300px] border-b-2 border-gray-700 text-center h-[200px]'>
+            <h1 className='font-bold text-4xl pt-8'>44</h1>
+            <p>Total of Products</p>
+          </div>
+          <div className='bg-blue-200 w-[300px] border-b-2 border-orange-700 text-center h-[200px]'>
+          <h1 className='font-bold text-4xl pt-8'>1000</h1>
+            <p>Total of Earning</p>
+          </div>
+          <div className='bg-green-200 w-[300px] border-b-2 border-blue-700 text-center h-[200px]'>
+          <h1 className='font-bold text-4xl pt-8'>120</h1>
+            <p>Total of Users</p>
+          </div>
+          
+        </div>
+
+
+
         <Banner query={query} handleInputChange={handleInputChange} />
         {/* main content */}
-
         <div className='bg-[#FAFAFA] md:grid grid-cols-4 gap-8 lg:px-24 px-4 py-12'>
           {/* left side */}
           <div className='bg-white p-4 rounded' >
             <Sidebar handleChanges={handleChanges} handleClick={handleClick}/>
           </div>
           {/* job cards */}
-          <div className='col-span-2 bg-white p-4 rounded-sm'>
+          <div className='col-span-2 shadow-xl bg-white p-4 rounded-sm'>
           {
             isLoading ? (<p className='font-medium'>Loading...</p>) :  result.length > 0 ?          
              <Jobs  result={result} />
@@ -149,7 +167,7 @@ const filterItems =  jobs.filter((job)=>job.jobTitle.toLowerCase().indexOf(query
           }
           </div>
           {/* right side */}
-          <div className='bg-white p-4 rounded'><Newslatter/></div>
+          <div className='bg-white p-4  shadow-sm rounded'><Newslatter/></div>
         
         </div>
 

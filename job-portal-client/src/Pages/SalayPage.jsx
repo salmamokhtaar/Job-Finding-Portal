@@ -19,7 +19,7 @@ const SalayPage = () => {
 
   }
   return (
-    <div className='max-w-screen-2xl container mx-auto xl:px-24 px-4'>
+    <div className='max-w-screen-2xl  mb-10 container mx-auto xl:px-24 px-4'>
       <PageHeader title={"Estimate Salary"} path={"Salary"}/>
       <div className='mt-5'>
         <div className='search-box p-2 text-center mb-2'>

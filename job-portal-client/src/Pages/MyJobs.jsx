@@ -1,7 +1,9 @@
 import React from 'react'
 import { useState,useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import CreateJob from './CreateJob'
+
+import { ToastContainer ,toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const MyJobs = () => {
   const [jobs,setJobs] = useState([])
   const [searchText,setSearchText] = useState("")
@@ -20,7 +22,7 @@ const MyJobs = () => {
       setLoading(false)
       
     })
-  },[searchText])
+  },[])
 
   // pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -56,10 +58,10 @@ const MyJobs = () => {
     .then(res => res.json)
     .then((data) => {
       if(data.acknowledged === true) {
-        alert("Job is not Deleted successfully")
+        toast("Job is not Deleted successfully")
       } 
       else{
-        alert("Job Deleted")
+        toast("Job Deleted")
         
       }
     })
@@ -147,7 +149,7 @@ const MyJobs = () => {
       )
     }
   </div>
-  
+  <ToastContainer/>
     </div>
   )
   }

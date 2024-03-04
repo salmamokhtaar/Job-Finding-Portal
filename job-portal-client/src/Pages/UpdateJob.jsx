@@ -5,6 +5,10 @@ import { useForm } from "react-hook-form"
 import { useNavigate } from 'react-router-dom';
 import CreatableSelect from 'react-select/creatable';
 
+import { ToastContainer ,toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 const UpdateJob = () => {
     const {id} = useParams()
     // console.log(id)
@@ -29,7 +33,7 @@ const UpdateJob = () => {
     }).then(res => res.json()).then((result)=>{
       console.log(result)
       if(result.acknowledged === true){
-        alert("Job Updated successfully")
+          alert("Job updated successfully")
         navigate("/myjobs")
       } 
       reset()
@@ -141,8 +145,8 @@ const UpdateJob = () => {
              <div>
              <label className='block mb-2 text-lg'>Required Skill Sets:</label>
            <CreatableSelect
-           defaultValue={skills}
            onChange={setSelectedOption}
+           defaultValue={skills}
            options={options}
            isMulti
            className='create-job-input py-4'
@@ -168,7 +172,7 @@ const UpdateJob = () => {
    
              </div>
    
-   {/* seventy */}
+  
             <div className='w-full'>
             <label className='block mb-2 text-lg'>Job Description</label>
             <textarea  
@@ -204,9 +208,9 @@ const UpdateJob = () => {
 
            </form>
      </div>
-          
+          <ToastContainer/>
        </div>
   )
 }
-
+<ToastContainer/>
 export default UpdateJob

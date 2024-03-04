@@ -28,7 +28,7 @@ const JobDetail = () => {
     
   return (
     <div className='max-w-screen-2xl container mx-auto xl:px-24 px-4'>
-        <PageHeader title={"Single Job Pagw"} path={"Single Job"}/>
+        <PageHeader title={"Single Job Page"} path={"Single Job"}/>
         <h2> Job Details: {id}</h2>
         <h3>{job.jobTitle}</h3>
         <button className='bg-blue-500 px-8 py-2 text-white'

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useForm } from "react-hook-form"
 import { useNavigate } from 'react-router-dom';
 import CreatableSelect from 'react-select/creatable';
+import { ToastContainer ,toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
   const CreateJob = () =>{
     const [selectedOption , setSelectedOption] = useState(null)
     const {
@@ -24,7 +26,7 @@ import CreatableSelect from 'react-select/creatable';
     }).then(res => res.json()).then((result)=>{
       console.log(result)
       if(result.acknowledged === true){
-        alert("Job Posted successfully")
+        toast("Job Posted successfully")
         navigate("/")
       } 
       reset()
@@ -44,7 +46,7 @@ import CreatableSelect from 'react-select/creatable';
 
 
   return (
-    <div className='max-w-screen container mx-auto xl:px-24 px-4'>
+    <div className='max-w-screen mb-10 container mx-auto xl:px-24 px-4'>
         
  <div className='bg-[#FAFAFA] px-4 py-10  lg:px-16'>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-5 '>
@@ -140,11 +142,10 @@ import CreatableSelect from 'react-select/creatable';
           <label className='block mb-2 text-lg'>Employment Type</label>
           <select {...register("employmentType")} className='create-job-input'>
         <option value="">Choose your Time</option>
-        <option value="Full-time">Full Time</option>
-        <option value="Part-time">Part Time</option>
-        <option value="Temporary">Temporary</option>
+        <option value="Full-time">FullTime</option>
+        <option value="Part-time">PartTime</option>
+        <option value="Temporary">Temp orary</option>
       </select>
-
         </div>
       
 
@@ -172,18 +173,11 @@ import CreatableSelect from 'react-select/creatable';
           placeholder="your email" 
       {...register("postedBy")} 
       className='create-job-input'/>
-
-
     </div>
-
-
-
-
-
       <input type="submit"  className='block mt-12 bg-blue-700 textwhite font-semibold px-8 py-2 roumded-sm cursor-pointer text-white'/>
         </form>
   </div>
-       
+       <ToastContainer/>
     </div>
   )
 }

@@ -5,6 +5,7 @@ const port = process.env.PORT || 5000;
 require('dotenv').config()
 
 
+const mongoose = require('mongoose');
 
 // middle ware
 app.use(express.json())
@@ -33,6 +34,82 @@ async function run() {
     const db= client.db("mernJobPortal")
     // create collection
     const jobCollections = db.collection("demoJobs")
+    const userCollections = db.collection("userCollection");
+
+// post re
+app.post("/user/register", async (req, res) => {
+  const { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    return res.status(400).send({
+      message: "Username, email, and password are required.",
+      status: false
+    });
+  }
+
+  // Check if the user already exists
+  const existingUser = await userCollections.findOne({ email });
+  if (existingUser) {
+    return res.status(400).send({
+      message: "User already exists.",
+      status: false
+    });
+  }
+
+  // Create a new user object
+  const newUser = {
+    username,
+    email,
+    password,
+    createdAt: new Date()
+  };
+
+  // Insert the new user into the collection
+  const result = await userCollections.insertOne(newUser);
+
+  if (result.insertedId) {
+    return res.status(200).send({
+      message: "User registered successfully.",
+      status: true
+    });
+  } else {
+    return res.status(500).send({
+      message: "Cannot insert user. Please try again.",
+      status: false
+    });
+  }
+});
+// get
+app.get("/get-user" , async (req, res) => {
+  const users= await userCollections.find({}).toArray()
+  res.send(users)
+})
+// login
+app.post("/user/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).send({
+      message: "Email and password are required.",
+      status: false
+    });
+  }
+  const existingUser = await userCollections.findOne({ email, password });
+  if (!existingUser) {
+    return res.status(400).send({
+      message: "Email or password is incorrect.",
+      status: false
+    });
+  }
+  return res.status(200).send({
+    message: "Login successful.",
+    status: true
+  });
+  } catch (error) {
+    console.log(error)
+    
+  }
+  
+});
 
     // post a job
     app.post("/post-job" , async (req, res) => {
@@ -52,6 +129,9 @@ async function run() {
 
 
     })
+
+    // get user
+   
 
     // get all jobs
     app.get("/all-jobs", async(req,res) => {
@@ -105,6 +185,8 @@ async function run() {
       res.send(result)
       
     })
+
+  
   
 
 
@@ -117,9 +199,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
-
 
 
 
