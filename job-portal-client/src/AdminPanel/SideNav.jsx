@@ -1,31 +1,12 @@
 import React from 'react'
 import {Link} from 'react-router-dom'
-import { useState,useEffect } from 'react'
 import swir from '../assets/d3.png'
 import swir1 from '../assets/las.png'
 import da from '../assets/j.jpeg'
 import d5 from '../assets/d5.png'
-import axios from 'axios'
 function SideNav() {
-  const [users,setUsers] = useState([])
-  const [jobs,setJobs] = useState([])
 
-  const getTotalOfUsers =() => {
-    axios.get("http://localhost:5000/get-user").then((response)=>{
-      console.log(response.data)
-      setUsers(response.data[0].users)
-    }).catch((error) => console.log(error))
-}
-// const getTotalOfJobs =() => {
-//   axios.get(`http://localhost:5000/myJobs/salma@gmail.com`).then((response)=>{
-//     console.log(response.data)
-//     setJobs(response.data[0].jobs)
-//   }).catch((error) => console.log(error))
-// }
-useEffect(() =>{
-  getTotalOfUsers()
-  // getTotalOfJobs()
-},[])
+
   return (
     <>
     <div className='bg-blue-500 border-r-2 border-black w-[20%] flex flex-col h-screen fixed text-white text-3xl space-y-8 pl-10 pt-10'>

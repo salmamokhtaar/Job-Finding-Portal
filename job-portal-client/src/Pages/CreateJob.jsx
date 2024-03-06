@@ -37,11 +37,10 @@ import 'react-toastify/dist/ReactToastify.css';
 
   const onSubmit = (data) => {
     // Check if all input fields are filled
-    if (!data.jobTitle || !data.description || !data.employmentType || !data.location || !data.skills || !data.salary) {
-        alert("Please fill all the input fields.");
-        return;
-    }
-
+    // if (!data.jobTitle || !data.description || !data.employmentType || !data.location || !data.skills || !data.salary) {
+    //     alert("Please fill all the input fields.");
+    //     return;
+    // }
     data.skills = selectedOption;
     // console.log(data)
     // from db mongodb atlas
