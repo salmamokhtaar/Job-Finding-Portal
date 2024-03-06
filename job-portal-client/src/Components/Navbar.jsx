@@ -10,9 +10,10 @@ const Navbar = () => {
     }
     const navItems = [
         {path: "/" ,title:"Start a Search"},
-        {path: "/myjobs" ,title: "My Jobs"},
         {path: "/salary" ,title: "Salary Estimated"},
-        {path: "/post-job" ,title: "Post a Job"}
+        // {path: "/post-job" ,title: "Post a Job"},
+        {path: "/about" ,title: "About US"}
+
     ]
   return (
     <header className='max-w-screen-2xl mx-auto xl:px-24 px-4 shadow-2xl'> 
@@ -48,8 +49,8 @@ const Navbar = () => {
 
         {/* Sign Up and Login up */}
         <div  className='text-base text-primary font-medium space-x-5 hidden lg:block' >
-      <Link to={"/singup"} className='py-2  px-5 border rounded  bg-blue-500 text-white ' > Sign Up</Link>
-      <Link to={"/login"} className='py-2 px-5 border rounded  '> Login</Link>
+      <Link to={"/"} className='py-2  px-5 border rounded  bg-blue-500 text-white ' >Get in touch</Link>
+      <Link to={"/"} className='py-2 px-5 border rounded'>Book Demo</Link>
 
         </div>
         {/* mobile menu */}
@@ -79,7 +80,7 @@ const Navbar = () => {
                     </li>
 
                 ))}
-         <li className='text-white py-1'><Link to={"/login"}> Login</Link>
+         <li className='text-white py-1'><Link to={"/login"}> Book in Demo</Link>
 </li>
 
   </ul>

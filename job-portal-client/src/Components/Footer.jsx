@@ -3,7 +3,7 @@ import React from 'react'
 function Footer() {
   return (
     <div>
-      <div className="bg-blue-500">
+      <div className="bg-blue-500 mt-10">
       <div className="px-4 pt-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
         <div className="grid row-gap-10 mb-8 lg:grid-cols-6">
           <div className="grid grid-cols-2 gap-5 row-gap-8 lg:col-span-4 md:grid-cols-4">
@@ -47,14 +47,14 @@ function Footer() {
               </ul>
             </div>
             <div>
-              <p className="text-2xl font-bold tracking-wide text-white">Apples</p>
+              <p className="text-2xl font-bold tracking-wide text-white">Quick adds</p>
               <ul className="mt-2 space-y-2">
                 <li>
                   <a
                     href="/"
-                    className="text-white transition-colors duration-300 hover:text-deep-purple-accent-200"
+                    className="text-white  transition-colors duration-300 hover:text-deep-purple-accent-200"
                   >
-                    Web
+                    +252 617157083
                   </a>
                 </li>
                 <li>
@@ -62,7 +62,7 @@ function Footer() {
                     href="/"
                     className="text-white transition-colors duration-300 hover:text-deep-purple-accent-200"
                   >
-                    eCommerce
+                    +252 614431661
                   </a>
                 </li>
                 <li>
@@ -70,7 +70,7 @@ function Footer() {
                     href="/"
                     className="text-white transition-colors duration-300 hover:text-deep-purple-accent-200"
                   >
-                    Business
+                    jobportal@gmail.com
                   </a>
                 </li>
                 <li>
@@ -78,17 +78,10 @@ function Footer() {
                     href="/"
                     className="text-white transition-colors duration-300 hover:text-deep-purple-accent-200"
                   >
-                    Entertainment
+                    JopPortal.com
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="/"
-                    className="text-white transition-colors duration-300 hover:text-deep-purple-accent-200"
-                  >
-                    Portfolio
-                  </a>
-                </li>
+              
               </ul>
             </div>
             <div>
@@ -190,13 +183,12 @@ function Footer() {
               <button
                 type="submit"
                 className="inline-flex items-center justify-center h-12 px-6 font-medium tracking-wide text-white transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none"
-              >
-                Subscribe
+              >Subscribe
               </button>
             </form>
             <p className="mt-4 text-sm text-white">
-              Bacon ipsum dolor amet short ribs pig sausage prosciuto chicken
-              spare ribs salami.
+           The First Platform You Can Get Job.
+           <br/>We are always here for you 
             </p>
           </div>
         </div>

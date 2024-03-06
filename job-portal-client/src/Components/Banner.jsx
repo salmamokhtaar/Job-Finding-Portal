@@ -4,7 +4,7 @@ const Banner = ({query,handleInputChange}) => {
  
   return (
     <div className='max-w-screen-2xl container mx-auto xl:px-24 md:py-20 py-14'>
-    <h1 className='text-5xl font-bold text-primary mb-3'>Find your
+    <h1 className='sm:text-5xl text-3xl font-bold text-primary mb-3'>Find your
     <span className='text-blue-700'> new job</span> today</h1>
     <p className='text-lg text-black/70 nb-8'>Thousands of jobs in the computer, engineering and technologysectors are waiting for you.</p>
 

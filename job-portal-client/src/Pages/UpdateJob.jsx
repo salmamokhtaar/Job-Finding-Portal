@@ -93,8 +93,6 @@ const UpdateJob = () => {
            </div>
    
              </div>
-   
-   
              {/* 3aaaaad */}
               <div className='create-job-flex'>
            <div className='lg:w1/2 w-full'>
@@ -117,7 +115,6 @@ const UpdateJob = () => {
            </div>
    
              </div>
-   
              {/* fourth */}
              <div className='create-job-flex'>
              <div className='lg:w1/2 w-full'>
@@ -140,7 +137,6 @@ const UpdateJob = () => {
          
    
              </div>
-   
              {/* fifth row */}
              <div>
              <label className='block mb-2 text-lg'>Required Skill Sets:</label>
@@ -152,7 +148,6 @@ const UpdateJob = () => {
            className='create-job-input py-4'
            />
              </div>
-   
              {/* sixthy */}
              <div className='create-job-flex'>
            
@@ -171,8 +166,6 @@ const UpdateJob = () => {
          
    
              </div>
-   
-  
             <div className='w-full'>
             <label className='block mb-2 text-lg'>Job Description</label>
             <textarea  
@@ -183,9 +176,7 @@ const UpdateJob = () => {
    
    
             </div>
-   
             {/* last row */}
-   
             <div className='w-full'>
             <label className='block mb-2 text-lg'>Job Posted by</label>
             <input 
@@ -197,11 +188,6 @@ const UpdateJob = () => {
    
    
        </div>
-   
-   
-   
-   
-   
          <input type="submit"  
          className='block mt-12 bg-blue-700 textwhite font-semibold px-8 py-2 roumded-sm cursor-pointer text-white'
          />

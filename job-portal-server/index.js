@@ -35,8 +35,57 @@ async function run() {
     // create collection
     const jobCollections = db.collection("demoJobs")
     const userCollections = db.collection("userCollection");
+    const ApplicantCollection = db.collection("ApplicantCollection");
+  //  applicants
+    app.post("/user/Applicant", async (req, res) => {
+      const { email } = req.body;
+    
+      // Check if email is provided
+      if (!email) {
+        return res.status(400).send({
+          message: "Email is required.",
+          status: false
+        });
+      }
+    
+      // Check if the email already exists in the ApplicantCollection
+      const existingEmail = await ApplicantCollection.findOne({ email });
+      if (existingEmail) {
+        return res.status(400).send({
+          message: "Email already exists.",
+          status: false
+        });
+      }
+    
+      // Create a new applicant object
+      const newApplicant = {
+        email,
+        createdAt: new Date()
+      };
+    
+      // Insert the new applicant into the ApplicantCollection
+      const result = await ApplicantCollection.insertOne(newApplicant);
+    
+      if (result.insertedId) {
+        return res.status(200).send({
+          message: "Email sent successfully.",
+          status: true
+        });
+      } else {
+        return res.status(500).send({
+          message: "Cannot insert email. Please try again.",
+          status: false
+        });
+      }
+    });
+    // get applicants
+    app.get("/get/applicants" , async (req, res) => {
+      const applicant= await ApplicantCollection.find({}).toArray()
+      res.send(applicant)
+    })
+    
 
-// post re
+// post register
 app.post("/user/register", async (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
@@ -45,8 +94,6 @@ app.post("/user/register", async (req, res) => {
       status: false
     });
   }
-
-  // Check if the user already exists
   const existingUser = await userCollections.findOne({ email });
   if (existingUser) {
     return res.status(400).send({
@@ -54,18 +101,13 @@ app.post("/user/register", async (req, res) => {
       status: false
     });
   }
-
-  // Create a new user object
   const newUser = {
     username,
     email,
     password,
     createdAt: new Date()
   };
-
-  // Insert the new user into the collection
   const result = await userCollections.insertOne(newUser);
-
   if (result.insertedId) {
     return res.status(200).send({
       message: "User registered successfully.",
@@ -78,11 +120,55 @@ app.post("/user/register", async (req, res) => {
     });
   }
 });
-// get
+// get register
 app.get("/get-user" , async (req, res) => {
   const users= await userCollections.find({}).toArray()
   res.send(users)
 })
+// get single user
+app.get("/single/user/:id", async(req,res) => {
+  const id = req.params.id;
+  const user = await userCollections.findOne({
+    _id: new ObjectId(id)
+  })
+  res.send(user);
+})
+// delete user
+app.delete("/user/:id", async(req,res) => {
+  const id = req.params.id;
+  const filter = {_id: new ObjectId(id)}
+  const result = await userCollections.deleteOne(filter)
+  res.send(result)
+});
+// update
+app.put("/user/update/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const update = { $set: req.body }; // Assuming req.body contains the fields to update
+  const options = { returnOriginal: false };
+  try {
+      const result = await userCollections.findOneAndUpdate(filter, update, options);
+      if (result.value) {
+          res.status(200).send({
+              message: "User updated successfully.",
+              status: true
+          });
+      } else {
+          res.status(400).send({
+              message: "User not found.",
+              status: false
+          });
+      }
+  } catch (error) {
+      res.status(500).send({
+          message: "Cannot update user. Please try again.",
+          status: false
+      });
+  }
+});
+
+// email applican
+
 // login
 app.post("/user/login", async (req, res) => {
   try {
@@ -110,8 +196,7 @@ app.post("/user/login", async (req, res) => {
   }
   
 });
-
-    // post a job
+  // post a job
     app.post("/post-job" , async (req, res) => {
       const body = req.body;
       body.createAt =new Date();
@@ -126,13 +211,8 @@ app.post("/user/login", async (req, res) => {
           status: false
         })
       }
-
-
-    })
-
-    // get user
-   
-
+    })   
+ 
     // get all jobs
     app.get("/all-jobs", async(req,res) => {
       const jobs = await jobCollections.find({}).toArray()
@@ -155,13 +235,14 @@ app.post("/user/login", async (req, res) => {
       })
       res.send(job);
     })
-    // delete
+    // delete job
     app.delete("/job/:id", async(req,res) => {
       const id = req.params.id;
       const filter = {_id: new ObjectId(id)}
       const result = await jobCollections.deleteOne(filter)
       res.send(result)
     });
+   
     // get single job using id
     app.get("/all-jobs/:id", async(req,res) => {
       const id = req.params.id;
@@ -185,6 +266,7 @@ app.post("/user/login", async (req, res) => {
       res.send(result)
       
     })
+   
 
   
   

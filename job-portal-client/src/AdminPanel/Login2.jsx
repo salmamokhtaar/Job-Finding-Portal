@@ -11,25 +11,26 @@ function Login2() {
   const [password , setPassword] = useState("")
   const navigate = useNavigate()
 
+  
   const handleLogin = (e) => {
-    e.preventDefault()
-    axios.post('http://localhost:5000/user/login',{
+    e.preventDefault();
+    axios.post('http://localhost:5000/user/login', {
       "email": email,
       "password": password
-    }).then((response)=>{
-    if(response.data.error){
-      console.log(response.error)
-    alert("Incorrect email or password")
+    }).then((response) => {
+      if (response.data.status === false) {
+        alert("Email or password is incorrect");
+      } else {
+        alert("Successfully Login");
+        localStorage.setItem("user", JSON.stringify(response.data));
+        navigate("/sideNav");
       }
-      else{
-      alert("Successfully Login")
-      localStorage.setItem("user", JSON.stringify(response.data))
-        navigate("/sideNav")
-      }
-    }).catch((error)=> console.log(error));
-
-
+    }).catch((error) => {
+      console.log(error);
+      alert("An error occurred. Please try again.");
+    });
   }
+  
    
 
     

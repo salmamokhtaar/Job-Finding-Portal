@@ -9,24 +9,40 @@ function SingUp() {
     const [password , setPassword] = useState("")
     const navigate = useNavigate()
 
+    // const handleRegister = (e) => {
+    //     e.preventDefault()
+    //     axios.post('http://localhost:5000/user/register',{
+    //         "username": username,
+    //         "email": email,
+    //         "password": password
+    //     }).then(()=>{
+    //         alert("Registered..");
+    //         navigate("/login")
+            
+    //     }).catch((error)=> console.log(error));
+    // }
+    
     const handleRegister = (e) => {
-        e.preventDefault()
-        axios.post('http://localhost:5000/user/register',{
+        e.preventDefault();
+        if (!username || !email || !password) {
+            alert("Please fill all the input fields.");
+            return;
+        }
+        if (!email.includes("@gmail.com")) {
+            alert("Please enter a valid Gmail address.");
+            return;
+        }
+        axios.post('http://localhost:5000/user/register', {
             "username": username,
             "email": email,
             "password": password
-        }).then(()=>{
-            alert("Registered..");
-            navigate("/login")
-            
-        }).catch((error)=> console.log(error));
+        }).then(() => {
+            alert("Registered.");
+            navigate("/login");
+        }).catch((error) => console.log(error));
     }
     
         
-    
-
-
-
   return (
     <div>
         <section class="bg-gray-50 dark:bg-gray-900">

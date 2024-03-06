@@ -15,7 +15,33 @@ import 'react-toastify/dist/ReactToastify.css';
   } = useForm()
   const navigate = useNavigate()
 
+  // const onSubmit = (data) => {
+  //   data.skills = selectedOption;
+  //   // console.log(data)
+  //   // from db mongodb atlas
+  //   fetch("http://localhost:5000/post-job",{
+  //     method: 'POST',
+  //     headers: { 'content-type': 'application/json' },
+  //     body: JSON.stringify(data)
+  //   }).then(res => res.json()).then((result)=>{
+  //     console.log(result)
+  //     if(result.acknowledged === true){
+  //       alert("Job Posted successfully")
+  //       navigate("/sideNav")
+  //     } 
+  //     reset()
+  //   })
+    
+  // }
+
+
   const onSubmit = (data) => {
+    // Check if all input fields are filled
+    if (!data.jobTitle || !data.description || !data.employmentType || !data.location || !data.skills || !data.salary) {
+        alert("Please fill all the input fields.");
+        return;
+    }
+
     data.skills = selectedOption;
     // console.log(data)
     // from db mongodb atlas
@@ -26,13 +52,14 @@ import 'react-toastify/dist/ReactToastify.css';
     }).then(res => res.json()).then((result)=>{
       console.log(result)
       if(result.acknowledged === true){
-        toast("Job Posted successfully")
-        navigate("/")
+        alert("Job Posted successfully")
+        navigate("/sideNav")
       } 
       reset()
     })
     
-  }
+}
+
 
   // skills
   const options =[
