@@ -1,8 +1,8 @@
-import React from 'react'
-import { useState,useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-
-import { ToastContainer ,toast } from 'react-toastify';
+import SideNav from '../AdminPanel/SideNav'
+import { FaEdit, FaTrash, FaSearch } from 'react-icons/fa'
+import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 
 function Users() {
@@ -13,14 +13,14 @@ function Users() {
   const [currentPage , setCurrentPage] = useState(1)
   const itemsPerPage = 4;
 
- 
+
   useEffect(() =>{
     setLoading(true)
     fetch(`http://localhost:5000/get-user`)
     .then(res => res.json()).then(data => {
       setUsers(data)
       setLoading(false)
-      
+
     })
   },[])
 
@@ -33,7 +33,7 @@ function Users() {
     if(indexOfLastItem < users.length){
       setCurrentPage(currentPage + 1)
     }
-    
+
   }
   const prevPage = () => {
     if(indexOfLastItem >1){
@@ -43,7 +43,7 @@ function Users() {
   }
 
   const handleSearch =() => {
-    const filter= users.filter((user)=> 
+    const filter= users.filter((user)=>
     user.username.toLowerCase().indexOf(searchText.toLowerCase()) !== -1)
     // console.log(filter)
     setUsers(filter)
@@ -53,102 +53,151 @@ function Users() {
   const handleDelete = (id) => {
     // console.log(id)
     fetch(`http://localhost:5000/user/${id}`,{
-      method: 'DELETE' 
+      method: 'DELETE'
     })
     .then(res => res.json)
     .then((data) => {
       if(data.acknowledged === true) {
         toast("Job is not Deleted successfully")
-      } 
+      }
       else{
         toast("User Deleted")
-        
+
       }
     })
   }
   return (
-    <div>
-       <div className='max-w-screen-2xl container mx-auto xl:px-24 px-4' >
-       <div className='my-job-container'>
-    <h1 className='text-center p-4 font-bold text-3xl text-blue-500'>All Users</h1>
-        <div className='search-box p-2 text-center mb-2'>
-          <input type='text' name='search' id='search'
-             onChange={(e) => setSearchText(e.target.value)} 
-             onClick={handleSearch}
-          className='px-4 py-2 pl-3 border focus:outline-none lg:w-6/12 mb-4 w-full' />
-          <button className='bg-blue-500 text-white font-semibold px-6 py-2 rounded-sm mb-4'>Search</button>
+    <div className="flex">
+      {/* Side Navigation */}
+      <SideNav />
+
+      {/* Main Content */}
+      <div className="ml-[22%] w-full pr-8 py-8">
+        <h1 className="text-3xl font-bold mb-6 text-blue-600">All Users</h1>
+
+        {/* Search Bar */}
+        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+          <div className="flex items-center">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search users by username..."
+                className="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <FaSearch />
+              </div>
+            </div>
+            <button
+              onClick={handleSearch}
+              className="ml-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+
+        {/* Users Table */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <p className="text-xl">Loading users...</p>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Password</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {currentJobs.map((user, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{indexOfFirstItem + index + 1}</div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="text-sm text-gray-500 capitalize">{user.role || 'applicant'}</div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">••••••••</div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                          <Link
+                            to={`/admin/edit-user/${user?._id}`}
+                            className="text-blue-600 hover:text-blue-900 mr-3"
+                          >
+                            <FaEdit className="inline mr-1" /> Edit
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(user._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <FaTrash className="inline mr-1" /> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 sm:px-6">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">
+                    Showing <span className="font-medium">{indexOfFirstItem + 1}</span> to{" "}
+                    <span className="font-medium">
+                      {Math.min(indexOfLastItem, users.length)}
+                    </span>{" "}
+                    of <span className="font-medium">{users.length}</span> users
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={prevPage}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === 1
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-blue-500 text-white hover:bg-blue-600"
+                      }`}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={nextPage}
+                      disabled={indexOfLastItem >= users.length}
+                      className={`px-3 py-1 rounded-md ${
+                        indexOfLastItem >= users.length
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-blue-500 text-white hover:bg-blue-600"
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
-      {/* table */}
-      <div className="flex flex-col shadow-2xl ">
-  <div className="-m-1.5 overflow-x-auto">
-    <div className="p-1.5 min-w-full inline-block align-middle">
-      <div className="overflow-hidden">
-      <div className='flex justify-between '>
-       <caption className="py-2 px-10 font-bold  text-blue-500  text-start text-sm  dark:text-gray-500">All Users</caption>
-       </div>
-        <table className="min-w-full mt-6 divide-y divide-gray-200 dark:divide-gray-700">
-          <thead>
-            <tr>
-              <th scope="col" className="px-6  py-3 text-center text-xs font-bold text-black uppercase">No.</th>
-              <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-black uppercase">Username</th>
-              <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-black uppercase">Gmail</th>
-              <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-black uppercase">Password</th>
-              <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-black uppercase">EDIT</th>
-              <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-black uppercase">DELETE</th>
-            </tr>
-          </thead>
-          {isLoading ? (<div className='flex items-center justify-center h-20'><p>Loading</p></div>)  : 
-          (  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-          {
-           currentJobs.map((user,index) => (
-             <tr key={index}>
-             <td className="px-6 py-4  text-center text-sm font-medium text-gray-800 dark:text-gray-200">{index+1}</td>
-             <td className="px-6 py-4  text-center text-sm text-gray-800 dark:text-gray-200">{user.username}</td>
-             <td className="px-6 py-4  text-center text-sm text-gray-800 dark:text-gray-200">{user.email}</td>
-             <td className="px-6 py-4  text-center text-sm text-gray-800 dark:text-gray-200">{user.password}</td>
-             <td className="px-6 py-4  text-center text-sm text-gray-800 dark:text-gray-200">
-               <button><Link to={`/edit-user/${user?._id}`}><i class="fa-solid fa-pen"></i></Link></button>
-             </td>
-           
-             <td className="px-6 py-4  text-center text-sm text-gray-800 dark:text-gray-200">
-             <button onClick={()=> handleDelete(user._id)}
-             className='py-2 px-6 rounded-sm'> 
-             <i class="fa-solid fa-trash"></i>
-             </button></td>
-             
-           </tr>
-   
-           ))
-          }
-   
-             
-   
-            
-             </tbody>)
-          }
-        
-        </table>
-      </div>
-    </div>
-  </div>
-  {/* paginatios */}
-  
-</div>
-<div className='flex justify-center text-black space-x-8 mb-8'>
-    {
-      currentPage > 1 && (
-        <button onClick={prevPage} className='hover:underline' >Previous</button>
-      )
-    }
-     {
-      indexOfLastItem < users.length && (
-        <button onClick={nextPage} className='hover:underline' >Next</button >
-      )
-    }
-  </div>
-  <ToastContainer/>
-    </div>
+      <ToastContainer />
     </div>
   )
 }

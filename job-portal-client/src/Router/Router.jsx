@@ -16,6 +16,10 @@ import UpdateUser from "../Pages/UpdateUser";
 import ApplicantsList from "../Components/ApplicantsList";
 import ApplicantDashboard from "../Pages/ApplicantDashboard";
 import CompanyDashboard from "../Pages/CompanyDashboard";
+import AllJobs from "../AdminPanel/AllJobs";
+import CreateJobAdmin from "../AdminPanel/CreateJobAdmin";
+import EditUser from "../AdminPanel/EditUser";
+import EditJob from "../AdminPanel/EditJob";
 const router = createBrowserRouter([
     {
       path: "/",
@@ -62,7 +66,7 @@ const router = createBrowserRouter([
       element: <PrivateRoute requiredRole="company"><CompanyDashboard/></PrivateRoute>
     },
 
-    // Job management routes
+    // Job management routes (company)
     {
       path: "/myjobs",
       element: <PrivateRoute requiredRole="company"><MyJobs/></PrivateRoute>
@@ -76,9 +80,23 @@ const router = createBrowserRouter([
       element: <PrivateRoute requiredRole="company"><MyJobs/></PrivateRoute>
     },
 
+    // Admin job management routes
+    {
+      path: "/admin/jobs",
+      element: <PrivateRoute requiredRole="admin"><AllJobs/></PrivateRoute>
+    },
+    {
+      path: "/admin/create-job",
+      element: <PrivateRoute requiredRole="admin"><CreateJobAdmin/></PrivateRoute>
+    },
+    {
+      path: "/admin/edit-job/:id",
+      element: <PrivateRoute requiredRole="admin"><EditJob/></PrivateRoute>
+    },
+
     // User management routes (admin only)
     {
-      path: "/users",
+      path: "/admin/users",
       element: <PrivateRoute requiredRole="admin"><Users/></PrivateRoute>
     },
     {
@@ -89,6 +107,10 @@ const router = createBrowserRouter([
       path: "/edit-user/:id",
       element: <PrivateRoute requiredRole="admin"><UpdateUser/></PrivateRoute>,
       loader: ({params}) => fetch(`http://localhost:5000/single/user/${params.id}`)
+    },
+    {
+      path: "/admin/edit-user/:id",
+      element: <PrivateRoute requiredRole="admin"><EditUser/></PrivateRoute>
     },
 
     // Application routes (applicant only)
