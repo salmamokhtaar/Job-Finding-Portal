@@ -25,16 +25,68 @@ const EditUser = () => {
     const fetchUser = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/single/user/${id}`);
-        const data = await response.json();
-        setUserData(data);
-        
-        // Set form values
-        setValue("username", data.username);
-        setValue("email", data.email);
-        setValue("password", data.password);
-        setValue("role", data.role || "applicant");
-        
+
+        // Get auth token from localStorage
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = userData.token;
+
+        if (!token) {
+          toast.error('Authentication required. Please log in again.');
+          navigate('/login');
+          return;
+        }
+
+        // Try the direct fetch first - simplest approach
+        try {
+          console.log(`Fetching user with ID: ${id}`);
+          const response = await fetch(`http://localhost:5000/single/user/${id}`);
+
+          if (!response.ok) {
+            throw new Error(`API response not ok: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("User data fetched:", data);
+          setUserData(data);
+
+          // Set form values
+          setValue("username", data.username);
+          setValue("email", data.email);
+          setValue("role", data.role || "applicant");
+
+          setLoading(false);
+        } catch (directError) {
+          console.error('Direct fetch error:', directError);
+
+          // Try the users endpoint to get all users and find the one we need
+          try {
+            const allUsersResponse = await fetch('http://localhost:5000/get-user');
+
+            if (!allUsersResponse.ok) {
+              throw new Error('All users API response not ok');
+            }
+
+            const allUsers = await allUsersResponse.json();
+            const user = allUsers.find(u => u._id === id);
+
+            if (!user) {
+              throw new Error('User not found in the list');
+            }
+
+            console.log("User found in all users:", user);
+            setUserData(user);
+
+            // Set form values
+            setValue("username", user.username);
+            setValue("email", user.email);
+            setValue("password", ""); // Don't show actual password for security
+            setValue("role", user.role || "applicant");
+          } catch (allUsersError) {
+            console.error('All users fetch error:', allUsersError);
+            throw new Error('Failed to find user data');
+          }
+        }
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -44,25 +96,52 @@ const EditUser = () => {
     };
 
     fetchUser();
-  }, [id, setValue]);
+  }, [id, setValue, navigate]);
 
   const onSubmit = async (data) => {
     try {
-      const response = await fetch(`http://localhost:5000/single/user/${id}`, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      
-      const result = await response.json();
-      
-      if (result.acknowledged === true) {
-        toast.success("User updated successfully");
-        setTimeout(() => {
-          navigate("/admin/users");
-        }, 2000);
-      } else {
-        toast.error("Failed to update user");
+      // Get auth token from localStorage
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      const token = userData.token;
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        navigate('/login');
+        return;
+      }
+
+      console.log("Submitting user update:", data);
+
+      // If password is empty, remove it from the data to keep the existing password
+      const updateData = {...data};
+      if (!updateData.password) {
+        delete updateData.password;
+      }
+
+      console.log("Cleaned update data:", updateData);
+
+      // Use the correct legacy endpoint for updating users
+      try {
+        const response = await fetch(`http://localhost:5000/user/update/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData)
+        });
+
+        const result = await response.json();
+        console.log("Update result:", result);
+
+        if (result.status === true) {
+          toast.success("User updated successfully");
+          setTimeout(() => {
+            navigate("/admin/users");
+          }, 2000);
+        } else {
+          toast.error(result.message || "Failed to update user");
+        }
+      } catch (error) {
+        console.error('Update error:', error);
+        toast.error("An error occurred while updating the user");
       }
     } catch (error) {
       console.error('Error updating user:', error);
@@ -74,11 +153,11 @@ const EditUser = () => {
     <div className="flex">
       {/* Side Navigation */}
       <SideNav />
-      
+
       {/* Main Content */}
       <div className="ml-[22%] w-full pr-8 py-8">
         <h1 className="text-3xl font-bold mb-6 text-blue-600">Edit User</h1>
-        
+
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <p className="text-xl">Loading user data...</p>
@@ -102,7 +181,7 @@ const EditUser = () => {
                   </div>
                   {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username.message}</p>}
                 </div>
-                
+
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -112,7 +191,7 @@ const EditUser = () => {
                     </div>
                     <input
                       type="email"
-                      {...register("email", { 
+                      {...register("email", {
                         required: "Email is required",
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -124,7 +203,7 @@ const EditUser = () => {
                   </div>
                   {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
                 </div>
-                
+
                 {/* Password */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -134,13 +213,22 @@ const EditUser = () => {
                     </div>
                     <input
                       type="password"
-                      {...register("password", { required: "Password is required" })}
+                      {...register("password", {
+                        // Only require password if it's a new user
+                        validate: value => {
+                          // If editing an existing user and password is empty, it's ok (we'll keep the old password)
+                          if (id && !value) return true;
+                          // Otherwise require a password
+                          return !!value || "Password is required";
+                        }
+                      })}
+                      placeholder="Leave empty to keep current password"
                       className="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
                 </div>
-                
+
                 {/* Role */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -159,7 +247,7 @@ const EditUser = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-4 mt-6">
                 <button
                   type="button"

@@ -1,10 +1,8 @@
-import React from 'react'
 import axios from 'axios'
-import { useState} from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { ToastContainer ,toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import SingUp from './SingUp';
 
 function Login2() {
   const [email , setemail] = useState("")
@@ -57,13 +55,49 @@ function Login2() {
           toast.error("Email or password is incorrect");
         } else {
           toast.success("Login successful!");
-          localStorage.setItem("user", JSON.stringify({
-            ...response.data,
-            email: email,
-            role: 'admin', // Default to admin for legacy users
-            isAuthenticated: true
-          }));
-          navigate("/dashboard");
+
+          // Generate a mock token for legacy API (since it doesn't provide one)
+          const mockToken = btoa(`${email}:${Date.now()}`);
+
+          // Fetch user details to get username and other info
+          axios.get('http://localhost:5000/get-user')
+            .then(usersResponse => {
+              const users = usersResponse.data;
+              const currentUser = users.find(user => user.email === email);
+
+              if (currentUser) {
+                localStorage.setItem("user", JSON.stringify({
+                  id: currentUser._id,
+                  _id: currentUser._id,
+                  username: currentUser.username,
+                  email: email,
+                  role: 'admin', // Default to admin for legacy users
+                  token: mockToken,
+                  isAuthenticated: true
+                }));
+              } else {
+                // If user details not found, store minimal info
+                localStorage.setItem("user", JSON.stringify({
+                  email: email,
+                  role: 'admin', // Default to admin for legacy users
+                  token: mockToken,
+                  isAuthenticated: true
+                }));
+              }
+
+              navigate("/dashboard");
+            })
+            .catch(err => {
+              console.error("Error fetching user details:", err);
+              // Store minimal info if user details fetch fails
+              localStorage.setItem("user", JSON.stringify({
+                email: email,
+                role: 'admin', // Default to admin for legacy users
+                token: mockToken,
+                isAuthenticated: true
+              }));
+              navigate("/dashboard");
+            });
         }
       }).catch((error) => {
         console.log("Legacy API error:", error);

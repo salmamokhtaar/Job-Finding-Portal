@@ -37,26 +37,77 @@ const EditJob = () => {
     const fetchJob = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/all-jobs/${id}`);
-        const data = await response.json();
-        setJobData(data);
-        
-        // Set form values
-        setValue("jobTitle", data.jobTitle);
-        setValue("companyName", data.companyName);
-        setValue("minPrice", data.minPrice);
-        setValue("maxPrice", data.maxPrice);
-        setValue("salaryType", data.salaryType);
-        setValue("jobLocation", data.jobLocation);
-        setValue("postingDate", data.postingDate ? data.postingDate.split('T')[0] : '');
-        setValue("experienceLevel", data.experienceLevel);
-        setValue("employmentType", data.employmentType);
-        setValue("description", data.description);
-        setValue("postedBy", data.postedBy);
-        
-        // Set skills
-        setSelectedOption(data.skills);
-        
+
+        // Get auth token from localStorage
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = userData.token;
+
+        if (!token) {
+          toast.error('Authentication required. Please log in again.');
+          navigate('/login');
+          return;
+        }
+
+        // Try the new API endpoint first
+        try {
+          const response = await fetch(`http://localhost:5000/api/jobs/${id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('API response not ok');
+          }
+
+          const data = await response.json();
+          setJobData(data.job);
+
+          // Set form values
+          setValue("jobTitle", data.job.jobTitle);
+          setValue("companyName", data.job.companyName);
+          setValue("minPrice", data.job.minPrice || data.job.minSalary);
+          setValue("maxPrice", data.job.maxPrice || data.job.maxSalary);
+          setValue("salaryType", data.job.salaryType);
+          setValue("jobLocation", data.job.jobLocation);
+          setValue("postingDate", data.job.postingDate ? data.job.postingDate.split('T')[0] : '');
+          setValue("experienceLevel", data.job.experienceLevel);
+          setValue("employmentType", data.job.employmentType);
+          setValue("description", data.job.description);
+          setValue("postedBy", data.job.postedBy);
+
+          // Set skills
+          setSelectedOption(data.job.skills);
+        } catch (apiError) {
+          console.log('New API error, trying legacy endpoint:', apiError);
+
+          // Fallback to legacy API
+          const legacyResponse = await fetch(`http://localhost:5000/all-jobs/${id}`);
+          if (!legacyResponse.ok) {
+            throw new Error('Legacy API response not ok');
+          }
+
+          const legacyData = await legacyResponse.json();
+          setJobData(legacyData);
+
+          // Set form values
+          setValue("jobTitle", legacyData.jobTitle);
+          setValue("companyName", legacyData.companyName);
+          setValue("minPrice", legacyData.minPrice || legacyData.minSalary);
+          setValue("maxPrice", legacyData.maxPrice || legacyData.maxSalary);
+          setValue("salaryType", legacyData.salaryType);
+          setValue("jobLocation", legacyData.jobLocation);
+          setValue("postingDate", legacyData.postingDate ? legacyData.postingDate.split('T')[0] : '');
+          setValue("experienceLevel", legacyData.experienceLevel);
+          setValue("employmentType", legacyData.employmentType);
+          setValue("description", legacyData.description);
+          setValue("postedBy", legacyData.postedBy);
+
+          // Set skills
+          setSelectedOption(legacyData.skills);
+        }
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching job:', error);
@@ -66,27 +117,71 @@ const EditJob = () => {
     };
 
     fetchJob();
-  }, [id, setValue]);
+  }, [id, setValue, navigate]);
 
   const onSubmit = async (data) => {
     try {
       data.skills = selectedOption;
-      
-      const response = await fetch(`http://localhost:5000/update-job/${id}`, {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      
-      const result = await response.json();
-      
-      if (result.acknowledged === true) {
-        toast.success("Job updated successfully");
-        setTimeout(() => {
-          navigate("/admin/jobs");
-        }, 2000);
-      } else {
-        toast.error("Failed to update job");
+
+      // Get auth token from localStorage
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      const token = userData.token;
+
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        navigate('/login');
+        return;
+      }
+
+      // Try the new API endpoint first
+      try {
+        const response = await fetch(`http://localhost:5000/api/jobs/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error('API response not ok');
+        }
+
+        const result = await response.json();
+
+        if (result.status === true) {
+          toast.success("Job updated successfully");
+          setTimeout(() => {
+            navigate("/admin/jobs");
+          }, 2000);
+        } else {
+          toast.error(result.message || "Failed to update job");
+        }
+      } catch (apiError) {
+        console.log('New API error, trying legacy endpoint:', apiError);
+
+        // Fallback to legacy API
+        const legacyResponse = await fetch(`http://localhost:5000/update-job/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!legacyResponse.ok) {
+          throw new Error('Legacy API response not ok');
+        }
+
+        const legacyResult = await legacyResponse.json();
+
+        if (legacyResult.acknowledged === true) {
+          toast.success("Job updated successfully");
+          setTimeout(() => {
+            navigate("/admin/jobs");
+          }, 2000);
+        } else {
+          toast.error("Failed to update job");
+        }
       }
     } catch (error) {
       console.error('Error updating job:', error);
@@ -98,11 +193,11 @@ const EditJob = () => {
     <div className="flex">
       {/* Side Navigation */}
       <SideNav />
-      
+
       {/* Main Content */}
       <div className="ml-[22%] w-full pr-8 py-8">
         <h1 className="text-3xl font-bold mb-6 text-blue-600">Edit Job</h1>
-        
+
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <p className="text-xl">Loading job data...</p>
@@ -126,7 +221,7 @@ const EditJob = () => {
                   </div>
                   {errors.jobTitle && <p className="text-red-500 text-xs mt-1">{errors.jobTitle.message}</p>}
                 </div>
-                
+
                 {/* Company Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
@@ -142,7 +237,7 @@ const EditJob = () => {
                   </div>
                   {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName.message}</p>}
                 </div>
-                
+
                 {/* Min Salary */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Salary</label>
@@ -158,7 +253,7 @@ const EditJob = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Max Salary */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Salary</label>
@@ -174,7 +269,7 @@ const EditJob = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Salary Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Salary Type</label>
@@ -187,7 +282,7 @@ const EditJob = () => {
                     <option value="Yearly">Yearly</option>
                   </select>
                 </div>
-                
+
                 {/* Job Location */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Job Location</label>
@@ -203,7 +298,7 @@ const EditJob = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Posting Date */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Posting Date</label>
@@ -218,7 +313,7 @@ const EditJob = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Experience Level */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
@@ -239,7 +334,7 @@ const EditJob = () => {
                     </select>
                   </div>
                 </div>
-                
+
                 {/* Employment Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
@@ -253,7 +348,7 @@ const EditJob = () => {
                     <option value="Contract">Contract</option>
                   </select>
                 </div>
-                
+
                 {/* Posted By */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Posted By</label>
@@ -265,7 +360,7 @@ const EditJob = () => {
                   />
                 </div>
               </div>
-              
+
               {/* Skills */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Required Skills</label>
@@ -278,7 +373,7 @@ const EditJob = () => {
                   classNamePrefix="select"
                 />
               </div>
-              
+
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Job Description</label>
@@ -288,7 +383,7 @@ const EditJob = () => {
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 ></textarea>
               </div>
-              
+
               <div className="flex justify-end space-x-4 mt-6">
                 <button
                   type="button"

@@ -76,7 +76,27 @@ function SingUp() {
             }).then((response) => {
                 if (response.data.status === true) {
                     toast.success("Registration successful!");
-                    navigate("/login");
+
+                    // Generate a mock token for legacy API (since it doesn't provide one)
+                    const mockToken = btoa(`${email}:${Date.now()}`);
+
+                    // Store user data with mock token
+                    localStorage.setItem("user", JSON.stringify({
+                        username: username,
+                        email: email,
+                        role: role || 'applicant',
+                        token: mockToken,
+                        isAuthenticated: true
+                    }));
+
+                    // Redirect based on user role
+                    if (role === 'admin') {
+                        navigate("/dashboard");
+                    } else if (role === 'company') {
+                        navigate("/company-dashboard");
+                    } else {
+                        navigate("/applicant-dashboard");
+                    }
                 } else {
                     toast.error(response.data.message || "Registration failed.");
                 }
