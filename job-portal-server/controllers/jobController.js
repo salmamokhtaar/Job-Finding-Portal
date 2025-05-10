@@ -1,0 +1,285 @@
+const Job = require('../models/Job');
+const Application = require('../models/Application');
+const mongoose = require('mongoose');
+
+// Create a new job (company only)
+const createJob = async (req, res) => {
+  try {
+    const jobData = req.body;
+    
+    // Add the company user ID as the poster
+    jobData.postedBy = req.user._id;
+    
+    // Create new job
+    const job = new Job(jobData);
+    await job.save();
+    
+    res.status(201).json({
+      message: "Job posted successfully.",
+      status: true,
+      job
+    });
+  } catch (error) {
+    console.error('Create job error:', error);
+    res.status(500).json({
+      message: "Server error while creating job.",
+      status: false
+    });
+  }
+};
+
+// Get all jobs with filters
+const getAllJobs = async (req, res) => {
+  try {
+    const { 
+      search, 
+      location, 
+      employmentType, 
+      experienceLevel,
+      salaryMin,
+      salaryMax,
+      skills,
+      status = 'active'
+    } = req.query;
+    
+    // Build query
+    const query = { status };
+    
+    // Search by title or company
+    if (search) {
+      query.$or = [
+        { jobTitle: { $regex: search, $options: 'i' } },
+        { companyName: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    // Filter by location
+    if (location) {
+      query.jobLocation = { $regex: location, $options: 'i' };
+    }
+    
+    // Filter by employment type
+    if (employmentType) {
+      query.employmentType = employmentType;
+    }
+    
+    // Filter by experience level
+    if (experienceLevel) {
+      query.experienceLevel = experienceLevel;
+    }
+    
+    // Filter by salary range
+    if (salaryMin || salaryMax) {
+      query.maxSalary = {};
+      if (salaryMin) query.maxSalary.$gte = Number(salaryMin);
+      if (salaryMax) query.maxSalary.$lte = Number(salaryMax);
+    }
+    
+    // Filter by skills
+    if (skills) {
+      const skillsArray = skills.split(',').map(skill => skill.trim());
+      query.skills = { $in: skillsArray };
+    }
+    
+    // Execute query with pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    const jobs = await Job.find(query)
+      .sort({ postingDate: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('postedBy', 'username email companyProfile.companyName companyProfile.companyLogo');
+    
+    // Get total count for pagination
+    const total = await Job.countDocuments(query);
+    
+    res.status(200).json({
+      status: true,
+      count: jobs.length,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      jobs
+    });
+  } catch (error) {
+    console.error('Get all jobs error:', error);
+    res.status(500).json({
+      message: "Server error while fetching jobs.",
+      status: false
+    });
+  }
+};
+
+// Get job by ID
+const getJobById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid job ID format.",
+        status: false
+      });
+    }
+    
+    const job = await Job.findById(id)
+      .populate('postedBy', 'username email companyProfile.companyName companyProfile.companyLogo');
+    
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found.",
+        status: false
+      });
+    }
+    
+    res.status(200).json({
+      status: true,
+      job
+    });
+  } catch (error) {
+    console.error('Get job by ID error:', error);
+    res.status(500).json({
+      message: "Server error while fetching job.",
+      status: false
+    });
+  }
+};
+
+// Get jobs posted by company
+const getCompanyJobs = async (req, res) => {
+  try {
+    const companyId = req.user._id;
+    
+    const jobs = await Job.find({ postedBy: companyId })
+      .sort({ postingDate: -1 });
+    
+    res.status(200).json({
+      status: true,
+      count: jobs.length,
+      jobs
+    });
+  } catch (error) {
+    console.error('Get company jobs error:', error);
+    res.status(500).json({
+      message: "Server error while fetching company jobs.",
+      status: false
+    });
+  }
+};
+
+// Update job (company only)
+const updateJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const companyId = req.user._id;
+    
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid job ID format.",
+        status: false
+      });
+    }
+    
+    // Find job and check ownership
+    const job = await Job.findById(id);
+    
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found.",
+        status: false
+      });
+    }
+    
+    // Check if the user is the job poster
+    if (job.postedBy.toString() !== companyId.toString()) {
+      return res.status(403).json({
+        message: "Access denied. You can only update your own job postings.",
+        status: false
+      });
+    }
+    
+    // Update job
+    const updatedJob = await Job.findByIdAndUpdate(
+      id,
+      { $set: { ...updates, updatedAt: Date.now() } },
+      { new: true, runValidators: true }
+    );
+    
+    res.status(200).json({
+      message: "Job updated successfully.",
+      status: true,
+      job: updatedJob
+    });
+  } catch (error) {
+    console.error('Update job error:', error);
+    res.status(500).json({
+      message: "Server error while updating job.",
+      status: false
+    });
+  }
+};
+
+// Delete job (company or admin)
+const deleteJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const userRole = req.user.role;
+    
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid job ID format.",
+        status: false
+      });
+    }
+    
+    // Find job
+    const job = await Job.findById(id);
+    
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found.",
+        status: false
+      });
+    }
+    
+    // Check if user is authorized to delete (company owner or admin)
+    if (userRole !== 'admin' && job.postedBy.toString() !== userId.toString()) {
+      return res.status(403).json({
+        message: "Access denied. You can only delete your own job postings.",
+        status: false
+      });
+    }
+    
+    // Delete job and related applications
+    await Job.findByIdAndDelete(id);
+    await Application.deleteMany({ job: id });
+    
+    res.status(200).json({
+      message: "Job deleted successfully.",
+      status: true
+    });
+  } catch (error) {
+    console.error('Delete job error:', error);
+    res.status(500).json({
+      message: "Server error while deleting job.",
+      status: false
+    });
+  }
+};
+
+module.exports = {
+  createJob,
+  getAllJobs,
+  getJobById,
+  getCompanyJobs,
+  updateJob,
+  deleteJob
+};

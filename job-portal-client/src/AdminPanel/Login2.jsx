@@ -11,38 +11,79 @@ function Login2() {
   const [password , setPassword] = useState("")
   const navigate = useNavigate()
 
-  
+
   const handleLogin = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:5000/user/login', {
+
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
+
+    // Try the new API endpoint first
+    axios.post('http://localhost:5000/api/auth/login', {
       "email": email,
       "password": password
     }).then((response) => {
-      if (response.data.status === false) {
-        alert("Email or password is incorrect");
-      } else {
-        alert("Successfully Login");
-        localStorage.setItem("user", JSON.stringify(response.data));
-        navigate("/sideNav");
+      if (response.data.status === true) {
+        toast.success("Login successful!");
+
+        // Store user data and token in localStorage
+        localStorage.setItem("user", JSON.stringify({
+          ...response.data.user,
+          token: response.data.token,
+          isAuthenticated: true
+        }));
+
+        // Redirect based on user role
+        const userRole = response.data.user.role;
+        if (userRole === 'admin') {
+          navigate("/dashboard");
+        } else if (userRole === 'company') {
+          navigate("/company-dashboard");
+        } else {
+          navigate("/applicant-dashboard");
+        }
       }
     }).catch((error) => {
-      console.log(error);
-      alert("An error occurred. Please try again.");
+      console.log("New API error:", error);
+
+      // Fallback to legacy API if new one fails
+      axios.post('http://localhost:5000/user/login', {
+        "email": email,
+        "password": password
+      }).then((response) => {
+        if (response.data.status === false) {
+          toast.error("Email or password is incorrect");
+        } else {
+          toast.success("Login successful!");
+          localStorage.setItem("user", JSON.stringify({
+            ...response.data,
+            email: email,
+            role: 'admin', // Default to admin for legacy users
+            isAuthenticated: true
+          }));
+          navigate("/dashboard");
+        }
+      }).catch((error) => {
+        console.log("Legacy API error:", error);
+        toast.error("Invalid credentials. Please try again.");
+      });
     });
   }
-  
-   
 
-    
 
-    
-    
+
+
+
+
+
 
   return (
     <div>
         <section class="bg-gray-50 dark:bg-gray-900">
   <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-    
+
       <div class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
               <h1 class="text-xl font-bold leading-tight tracking-tig md:text-2xl text-blue-500">
@@ -51,12 +92,12 @@ function Login2() {
               <form class="space-y-4 md:space-y-6" action="#">
                   <div>
                       <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-                      <input value={email} onChange={(e)=> setemail(e.target.value)} 
+                      <input value={email} onChange={(e)=> setemail(e.target.value)}
                        type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@gmail.com" required=""/>
                   </div>
                   <div>
                       <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
-                      <input value={password} onChange={(e)=> setPassword(e.target.value)} 
+                      <input value={password} onChange={(e)=> setPassword(e.target.value)}
                        type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required=""/>
                   </div>
                   <div class="flex items-center justify-between">
@@ -79,17 +120,17 @@ function Login2() {
 
 
 
-                  
 
 
-                 
-              
+
+
+
               </form>
           </div>
       </div>
   </div>
 </section>
-        
+
       <ToastContainer/>
     </div>
   )
