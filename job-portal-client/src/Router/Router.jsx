@@ -3,13 +3,14 @@ import App from '../App'
 import Home from '../Pages/Home'
 import CreateJob from "../Pages/CreateJob";
 import MyJobs from "../Pages/MyJobs";
-import SalayPage from "../Pages/SalayPage";
+import SalaryPage from "../Pages/SalaryPage";
 import UpdateJob from "../Pages/UpdateJob";
 import JobDetail from "../Pages/JobDetail";
 import Dashboard from "../AdminPanel/Dashboard";
 import SingUp from "../AdminPanel/SingUp";
 import Login2 from "../AdminPanel/Login2";
-import AboutUS from "../Pages/AboutUS";
+import AboutUs from "../Pages/AboutUs";
+import Contact from "../Pages/Contact";
 import PrivateRoute from "../AdminPanel/PrivateRoute";
 import Users from "../Components/Users";
 import UpdateUser from "../Pages/UpdateUser";
@@ -26,8 +27,9 @@ const router = createBrowserRouter([
       element: <App/>,
       children:[
         {path: "/",element:<Home/>},
-        {path: "/about", element:<AboutUS/>},
-        {path: "/salary", element:<SalayPage/>},
+        {path: "/about", element:<AboutUs/>},
+        {path: "/salary", element:<SalaryPage/>},
+        {path: "/contact", element:<Contact/>},
         {
           path: "/edit-job/:id",
           element:<UpdateJob/>,

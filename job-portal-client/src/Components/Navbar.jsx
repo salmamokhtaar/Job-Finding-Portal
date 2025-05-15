@@ -43,7 +43,8 @@ const Navbar = () => {
     const navItems = [
         { path: "/", title: "Find Jobs" },
         { path: "/salary", title: "Salary Guide" },
-        { path: "/about", title: "About Us" }
+        { path: "/about", title: "About Us" },
+        { path: "/contact", title: "Contact" }
     ];
 
     // Dashboard link based on user role
