@@ -1,164 +1,201 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,100;9..40,200;9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900;9..40,1000&display=swap');
+/* We're now using Google Fonts via the link tag in index.html */
 
-body{
-  font-family: 'DM Sans', sans-serif;
-}
-/*https://bytewebster.com/
-https://bytewebster.com/
-https://bytewebster.com/
-ByteWebster is a Professional web development and coding blog website.*/
-
-.active{
-  color: #3575E2;
-  font-weight: 500;
+/* Active navigation link styling */
+.active {
+  @apply text-brand-600 font-medium;
 }
 
+/* General styling */
 a {
-  text-decoration: none;
-  /* color: rgb(97, 97, 97); */
+  @apply no-underline transition-colors duration-200;
 }
 
 li {
-  list-style: none;
+  @apply list-none;
 }
 
-.btns {
-  padding: 10px 20px;
-  margin-right: 6px;
-  background: transparent;
-  border: none;
-  border: 0.6px solid #ccc;
-  border-radius: 5px;
-  color: #323232;
-  cursor: pointer;
+/* Container styles */
+.container-custom {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
-/* jobs page */
-
-.card {
-  margin: 20px;
-  border: 2px solid #ededed;
-  padding: 20px;
-  cursor: pointer;
+.section-padding {
+  @apply py-12 md:py-16 lg:py-20;
 }
 
-
-.card-title {
-  margin-bottom: 1rem;
+/* Hero section styles */
+.hero-section {
+  @apply bg-gradient-to-r from-brand-700 to-brand-900 text-white;
 }
 
-.card-reviews {
-  margin-bottom: 1rem;
-  display: flex;
+.hero-overlay {
+  @apply absolute inset-0 bg-black bg-opacity-50;
 }
 
-.rating-star {
-  color: #d5ab55;
+/* Job card styling */
+.job-card {
+  @apply bg-white rounded-lg shadow-card p-6 transition-all duration-300 hover:shadow-card-hover border border-gray-100;
 }
 
-.total-reviews {
-  font-size: 0.9rem;
-  margin-left: 10px;
+.job-card-header {
+  @apply flex items-start justify-between mb-4;
 }
 
-.card-price {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.job-card-company {
+  @apply text-sm font-medium text-brand-600 mb-1;
 }
 
-.bag-icon {
-  color: #535353;
+.job-card-title {
+  @apply text-xl font-bold text-gray-900 mb-2;
+}
+
+.job-card-location {
+  @apply flex items-center text-gray-500 text-sm;
+}
+
+.job-card-salary {
+  @apply text-gray-700 font-medium;
+}
+
+.job-card-tags {
+  @apply flex flex-wrap gap-2 mt-3;
+}
+
+.job-tag {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-800;
+}
+
+/* Sidebar styling */
+.sidebar {
+  @apply bg-white rounded-lg shadow-sm p-6;
 }
 
 .sidebar-title {
-  font-size: 22px;
-  font-weight: normal;
-  margin-bottom: 20px;
+  @apply text-lg font-semibold text-gray-900 mb-4;
 }
 
-.sidebar-items {
-  margin-top: 20px;
+.sidebar-section {
+  @apply mb-6;
 }
 
-.sidebar-label-container {
-  display: block;
-  position: relative;
-  padding-left: 35px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+.sidebar-section-title {
+  @apply text-sm font-medium text-gray-700 mb-3;
 }
 
-.sidebar-label-container input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
+/* Form styling */
+.form-container {
+  @apply bg-white rounded-lg shadow-sm p-6 md:p-8;
 }
 
-.checkmark {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 20px;
-  width: 20px;
-  background-color: #eee;
-  border-radius: 50%;
+.form-section {
+  @apply mb-6;
 }
 
-.all {
-  background: linear-gradient(blue, crimson);
+.form-section-title {
+  @apply text-lg font-medium text-gray-900 mb-4;
 }
 
-.sidebar-label-container:hover input ~ .checkmark {
-  background-color: #ccc;
+.form-group {
+  @apply mb-4;
 }
 
-.sidebar-label-container input:checked ~ .checkmark {
-  background-color: #2196f3;
+.form-input-container {
+  @apply relative;
 }
 
-.checkmark:after {
-  content: "";
-  position: absolute;
-  display: none;
+.form-input-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400;
 }
 
-.sidebar-label-container input:checked ~ .checkmark:after {
-  display: block;
+.form-input-with-icon {
+  @apply pl-10;
 }
 
-.sidebar-label-container .checkmark:after {
-  top: 6.4px;
-  left: 6.4px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: white;
+/* Dashboard styling */
+.dashboard-container {
+  @apply flex h-screen bg-gray-50;
 }
 
-.line {
-  margin-top: 3rem;
-  border-color: #f7f7f7;
-}
-.bg-cover {
-
-  background-image: url('https://images.pexels.com/photos/4348401/pexels-photo-4348401.jpeg?auto=compress&cs=tinysrgb&w=600');
-  background-size: cover;
-  background-repeat: no-repeat;
-
+.dashboard-sidebar {
+  @apply w-64 bg-white shadow-lg;
 }
 
-
-/* create a job page */
-
-.create-job-flex{
-  @apply flex flex-col lg:flex-row items-center justify-between gap-8;
+.dashboard-content {
+  @apply flex-1 overflow-y-auto;
 }
 
-.create-job-input{
-  @apply block w-full flex-1 bg-white py-1.5 pl-3 text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6
+.dashboard-header {
+  @apply bg-white shadow-sm;
+}
+
+.dashboard-main {
+  @apply p-6;
+}
+
+.stats-card {
+  @apply bg-white rounded-lg shadow-sm p-4 border-l-4;
+}
+
+.stats-card-blue {
+  @apply border-brand-500;
+}
+
+.stats-card-green {
+  @apply border-green-500;
+}
+
+.stats-card-purple {
+  @apply border-purple-500;
+}
+
+.stats-card-yellow {
+  @apply border-yellow-500;
+}
+
+/* Table styling */
+.table-container {
+  @apply overflow-x-auto;
+}
+
+.table {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+.table-header {
+  @apply bg-gray-50;
+}
+
+.table-header-cell {
+  @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.table-body {
+  @apply bg-white divide-y divide-gray-200;
+}
+
+.table-row {
+  @apply hover:bg-gray-50;
+}
+
+.table-cell {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-500;
+}
+
+/* Background images */
+.bg-hero {
+  background-image: url('https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80');
+  @apply bg-cover bg-center bg-no-repeat;
+}
+
+.bg-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Create job page */
+.create-job-flex {
+  @apply flex flex-col lg:flex-row items-start justify-between gap-8;
+}
+
+.create-job-input {
+  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm;
 }
