@@ -9,7 +9,7 @@ import JobDetail from "../Pages/JobDetail";
 import Dashboard from "../AdminPanel/Dashboard";
 import SingUp from "../AdminPanel/SingUp";
 import Login2 from "../AdminPanel/Login2";
-import AboutUs from "../Pages/AboutUs";
+import AboutUs from "../Pages/AboutUS";
 import Contact from "../Pages/Contact";
 import PrivateRoute from "../AdminPanel/PrivateRoute";
 import Users from "../Components/Users";

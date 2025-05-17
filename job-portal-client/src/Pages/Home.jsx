@@ -246,12 +246,12 @@ const Home = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar Filters */}
-            <div className="sidebar">
+            <div className="lg:col-span-1">
               <Sidebar handleChanges={handleChanges} handleClick={handleClick} />
             </div>
 
             {/* Job Listings */}
-            <div className="lg:col-span-2 card p-6">
+            <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
               {isLoading ? (
                 <div className="flex justify-center items-center h-64">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-600"></div>
