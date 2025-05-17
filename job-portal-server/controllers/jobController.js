@@ -2,13 +2,22 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const mongoose = require('mongoose');
 
-// Create a new job (company only)
+// Create a new job (company or admin)
 const createJob = async (req, res) => {
   try {
     const jobData = req.body;
+    const userRole = req.user.role;
 
-    // Add the company user ID as the poster
+    // Add the user ID as the poster
     jobData.postedBy = req.user._id;
+
+    // If the user is an admin, automatically approve the job
+    if (userRole === 'admin') {
+      jobData.approvalStatus = 'approved';
+    } else {
+      // For company users, set to pending by default
+      jobData.approvalStatus = 'pending';
+    }
 
     // Create new job
     const job = new Job(jobData);

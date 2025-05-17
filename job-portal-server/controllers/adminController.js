@@ -3,13 +3,23 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const mongoose = require('mongoose');
 
+// Debug imports
+console.log('User model imported:', !!User);
+console.log('Job model imported:', !!Job);
+console.log('Application model imported:', !!Application);
+
 // Get all jobs with approval status for admin
 const getAllJobsAdmin = async (req, res) => {
   try {
+    console.log("Admin requesting all jobs");
+
+    // Get all jobs, regardless of approval status
     const jobs = await Job.find()
       .sort({ createdAt: -1 })
       .populate('postedBy', 'username email companyProfile.companyName');
-    
+
+    console.log(`Found ${jobs.length} jobs`);
+
     res.status(200).json({
       status: true,
       count: jobs.length,
@@ -29,7 +39,7 @@ const updateJobApproval = async (req, res) => {
   try {
     const { id } = req.params;
     const { approvalStatus, rejectionReason } = req.body;
-    
+
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -37,7 +47,7 @@ const updateJobApproval = async (req, res) => {
         status: false
       });
     }
-    
+
     // Validate approval status
     if (!['pending', 'approved', 'rejected'].includes(approvalStatus)) {
       return res.status(400).json({
@@ -45,7 +55,7 @@ const updateJobApproval = async (req, res) => {
         status: false
       });
     }
-    
+
     // If rejecting, require a reason
     if (approvalStatus === 'rejected' && !rejectionReason) {
       return res.status(400).json({
@@ -53,7 +63,7 @@ const updateJobApproval = async (req, res) => {
         status: false
       });
     }
-    
+
     // Update job approval status
     const updateData = { approvalStatus };
     if (approvalStatus === 'rejected') {
@@ -61,20 +71,20 @@ const updateJobApproval = async (req, res) => {
     } else {
       updateData.rejectionReason = '';
     }
-    
+
     const job = await Job.findByIdAndUpdate(
       id,
       { $set: updateData },
       { new: true }
     ).populate('postedBy', 'username email companyProfile.companyName');
-    
+
     if (!job) {
       return res.status(404).json({
         message: "Job not found.",
         status: false
       });
     }
-    
+
     res.status(200).json({
       message: `Job ${approvalStatus === 'approved' ? 'approved' : 'rejected'} successfully.`,
       status: true,
@@ -97,26 +107,26 @@ const getSystemStats = async (req, res) => {
     const adminUsers = await User.countDocuments({ role: 'admin' });
     const companyUsers = await User.countDocuments({ role: 'company' });
     const applicantUsers = await User.countDocuments({ role: 'applicant' });
-    
+
     const totalJobs = await Job.countDocuments();
     const pendingJobs = await Job.countDocuments({ approvalStatus: 'pending' });
     const approvedJobs = await Job.countDocuments({ approvalStatus: 'approved' });
     const rejectedJobs = await Job.countDocuments({ approvalStatus: 'rejected' });
-    
+
     const totalApplications = await Application.countDocuments();
-    
+
     // Get recent activity
     const recentJobs = await Job.find()
       .sort({ createdAt: -1 })
       .limit(5)
       .populate('postedBy', 'username companyProfile.companyName');
-      
+
     const recentApplications = await Application.find()
       .sort({ appliedDate: -1 })
       .limit(5)
       .populate('job', 'jobTitle')
       .populate('applicant', 'username');
-    
+
     res.status(200).json({
       status: true,
       stats: {
@@ -154,7 +164,7 @@ const getSystemStats = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
-    
+
     // Validate required fields
     if (!username || !email || !password || !role) {
       return res.status(400).json({
@@ -162,7 +172,7 @@ const createUser = async (req, res) => {
         status: false
       });
     }
-    
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -171,7 +181,7 @@ const createUser = async (req, res) => {
         status: false
       });
     }
-    
+
     // Create new user
     const user = new User({
       username,
@@ -179,9 +189,9 @@ const createUser = async (req, res) => {
       password,
       role
     });
-    
+
     await user.save();
-    
+
     res.status(201).json({
       message: "User created successfully.",
       status: true,
@@ -201,9 +211,31 @@ const createUser = async (req, res) => {
   }
 };
 
+// Get all users (admin only)
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: true,
+      count: users.length,
+      users
+    });
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({
+      message: "Server error while fetching users.",
+      status: false
+    });
+  }
+};
+
 module.exports = {
   getAllJobsAdmin,
   updateJobApproval,
   getSystemStats,
-  createUser
+  createUser,
+  getAllUsers
 };

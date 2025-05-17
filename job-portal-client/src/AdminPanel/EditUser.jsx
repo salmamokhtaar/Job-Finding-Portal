@@ -36,56 +36,28 @@ const EditUser = () => {
           return;
         }
 
-        // Try the direct fetch first - simplest approach
-        try {
-          console.log(`Fetching user with ID: ${id}`);
-          const response = await fetch(`http://localhost:5000/single/user/${id}`);
+        // Directly use the get-user endpoint which is known to work
+        const allUsersResponse = await fetch('http://localhost:5000/get-user');
 
-          if (!response.ok) {
-            throw new Error(`API response not ok: ${response.status}`);
-          }
-
-          const data = await response.json();
-          console.log("User data fetched:", data);
-          setUserData(data);
-
-          // Set form values
-          setValue("username", data.username);
-          setValue("email", data.email);
-          setValue("role", data.role || "applicant");
-
-          setLoading(false);
-        } catch (directError) {
-          console.error('Direct fetch error:', directError);
-
-          // Try the users endpoint to get all users and find the one we need
-          try {
-            const allUsersResponse = await fetch('http://localhost:5000/get-user');
-
-            if (!allUsersResponse.ok) {
-              throw new Error('All users API response not ok');
-            }
-
-            const allUsers = await allUsersResponse.json();
-            const user = allUsers.find(u => u._id === id);
-
-            if (!user) {
-              throw new Error('User not found in the list');
-            }
-
-            console.log("User found in all users:", user);
-            setUserData(user);
-
-            // Set form values
-            setValue("username", user.username);
-            setValue("email", user.email);
-            setValue("password", ""); // Don't show actual password for security
-            setValue("role", user.role || "applicant");
-          } catch (allUsersError) {
-            console.error('All users fetch error:', allUsersError);
-            throw new Error('Failed to find user data');
-          }
+        if (!allUsersResponse.ok) {
+          throw new Error('Failed to fetch users');
         }
+
+        const allUsers = await allUsersResponse.json();
+        const user = allUsers.find(u => u._id === id);
+
+        if (!user) {
+          throw new Error('User not found');
+        }
+
+        console.log("User found:", user);
+        setUserData(user);
+
+        // Set form values
+        setValue("username", user.username);
+        setValue("email", user.email);
+        setValue("password", ""); // Don't show actual password for security
+        setValue("role", user.role || "applicant");
 
         setLoading(false);
       } catch (error) {

@@ -17,55 +17,70 @@ const ApplicantDashboard = () => {
       navigate('/login');
       return;
     }
-    
+
     setUser(userData);
-    
-    // Fetch user's applications
-    const fetchApplications = async () => {
+
+    // Fetch applicant data
+    const fetchApplicantData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/applications/my-applications', {
-          headers: {
-            Authorization: `Bearer ${userData.token}`
-          }
-        });
-        
-        if (response.data.status) {
-          setApplications(response.data.applications);
-        }
-      } catch (error) {
-        console.error('Error fetching applications:', error);
-      }
-    };
-    
-    // Fetch recent jobs
-    const fetchRecentJobs = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/jobs?limit=5');
-        
-        if (response.data.status) {
-          setRecentJobs(response.data.jobs);
-        } else {
-          // Fallback to legacy API
-          const legacyResponse = await axios.get('http://localhost:5000/all-jobs');
-          setRecentJobs(legacyResponse.data.slice(0, 5));
-        }
-      } catch (error) {
-        console.error('Error fetching recent jobs:', error);
-        
-        // Fallback to legacy API
+        setIsLoading(true);
+
+        // Try to use the new API endpoint first for stats
         try {
-          const legacyResponse = await axios.get('http://localhost:5000/all-jobs');
-          setRecentJobs(legacyResponse.data.slice(0, 5));
-        } catch (err) {
-          console.error('Error fetching legacy jobs:', err);
+          const statsResponse = await axios.get('http://localhost:5000/api/applicant/stats', {
+            headers: {
+              Authorization: `Bearer ${userData.token}`
+            }
+          });
+
+          if (statsResponse.data.status) {
+            // Set applications from stats response
+            if (statsResponse.data.recentApplications) {
+              setApplications(statsResponse.data.recentApplications);
+            }
+
+            // Fetch recent jobs
+            const jobsResponse = await axios.get('http://localhost:5000/api/jobs?limit=5');
+
+            if (jobsResponse.data.status) {
+              setRecentJobs(jobsResponse.data.jobs);
+              setIsLoading(false);
+              return;
+            }
+          }
+        } catch (apiError) {
+          console.log('New API error:', apiError);
+          // Fall back to legacy API
         }
-      } finally {
+
+        // Fallback to legacy APIs
+        try {
+          // Try to get applications
+          const applicationsResponse = await axios.get('http://localhost:5000/api/applications/my-applications', {
+            headers: {
+              Authorization: `Bearer ${userData.token}`
+            }
+          });
+
+          if (applicationsResponse.data.status) {
+            setApplications(applicationsResponse.data.applications);
+          }
+
+          // Get recent jobs
+          const jobsResponse = await axios.get('http://localhost:5000/all-jobs');
+          setRecentJobs(jobsResponse.data.slice(0, 5));
+        } catch (error) {
+          console.error('Error fetching legacy data:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error in fetchApplicantData:', error);
         setIsLoading(false);
       }
     };
-    
-    fetchApplications();
-    fetchRecentJobs();
+
+    fetchApplicantData();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -118,7 +133,7 @@ const ApplicantDashboard = () => {
             </Link>
           </div>
           <div className="px-6 py-4 border-t border-gray-200">
-            <button 
+            <button
               onClick={handleLogout}
               className="flex items-center w-full px-4 py-3 text-gray-600 rounded-md hover:bg-gray-100"
             >
@@ -149,7 +164,7 @@ const ApplicantDashboard = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-4">
             <div className="p-6 bg-white rounded-lg shadow-md">
               <div className="flex items-center">
                 <div className="p-3 mr-4 bg-blue-100 rounded-full">
@@ -158,6 +173,54 @@ const ApplicantDashboard = () => {
                 <div>
                   <p className="mb-2 text-sm font-medium text-gray-600">Total Applications</p>
                   <p className="text-3xl font-bold text-gray-700">{applications.length}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="flex items-center">
+                <div className="p-3 mr-4 bg-yellow-100 rounded-full">
+                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-3xl font-bold text-gray-700">
+                    {applications.filter(app => app.status === 'pending').length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="flex items-center">
+                <div className="p-3 mr-4 bg-green-100 rounded-full">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-gray-600">Reviewed</p>
+                  <p className="text-3xl font-bold text-gray-700">
+                    {applications.filter(app => ['reviewed', 'interviewed', 'offered'].includes(app.status)).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="flex items-center">
+                <div className="p-3 mr-4 bg-red-100 rounded-full">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-gray-600">Rejected</p>
+                  <p className="text-3xl font-bold text-gray-700">
+                    {applications.filter(app => app.status === 'rejected').length}
+                  </p>
                 </div>
               </div>
             </div>
@@ -180,7 +243,12 @@ const ApplicantDashboard = () => {
                             {application.job?.jobTitle || 'Job Title'}
                           </p>
                           <p className="text-sm text-gray-500">
-                            Status: <span className="font-medium capitalize">{application.status}</span>
+                            Status: <span className={`font-medium px-2 py-1 rounded-full text-xs
+                              ${application.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                application.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                'bg-green-100 text-green-800'}`}>
+                              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                            </span>
                           </p>
                           <p className="text-sm text-gray-500">
                             Applied: {new Date(application.appliedDate).toLocaleDateString()}
@@ -211,7 +279,7 @@ const ApplicantDashboard = () => {
             <div className="bg-white rounded-lg shadow-md">
               {recentJobs.length > 0 ? (
                 <div className="divide-y divide-gray-200">
-                  {recentJobs.map((job, index) => (
+                  {recentJobs.filter(job => job.approvalStatus === 'approved').map((job, index) => (
                     <div key={index} className="p-4 hover:bg-gray-50">
                       <div className="flex items-center">
                         <div className="p-2 mr-4 bg-blue-100 rounded-full">
@@ -225,7 +293,7 @@ const ApplicantDashboard = () => {
                             {job.companyName} • {job.jobLocation}
                           </p>
                           <p className="text-sm text-gray-500">
-                            ${job.minSalary} - ${job.maxSalary} • {job.employmentType}
+                            ${job.minPrice || job.minSalary || 0} - ${job.maxPrice || job.maxSalary || 0} • {job.employmentType}
                           </p>
                         </div>
                       </div>

@@ -147,7 +147,6 @@ function SingUp() {
                       >
                         <option value="applicant">Job Seeker</option>
                         <option value="company">Employer/Company</option>
-                        <option value="admin">Administrator</option>
                       </select>
                   </div>
 

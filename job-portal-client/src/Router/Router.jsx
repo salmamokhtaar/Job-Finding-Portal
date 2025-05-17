@@ -21,6 +21,7 @@ import AllJobs from "../AdminPanel/AllJobs";
 import CreateJobAdmin from "../AdminPanel/CreateJobAdmin";
 import EditUser from "../AdminPanel/EditUser";
 import EditJob from "../AdminPanel/EditJob";
+import AllUsers from "../AdminPanel/AllUsers";
 const router = createBrowserRouter([
     {
       path: "/",
@@ -99,7 +100,7 @@ const router = createBrowserRouter([
     // User management routes (admin only)
     {
       path: "/admin/users",
-      element: <PrivateRoute requiredRole="admin"><Users/></PrivateRoute>
+      element: <PrivateRoute requiredRole="admin"><AllUsers/></PrivateRoute>
     },
     {
       path: "/Applicants",

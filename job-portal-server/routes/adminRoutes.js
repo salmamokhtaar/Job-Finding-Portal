@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getAllJobsAdmin, 
-  updateJobApproval, 
+const {
+  getAllJobsAdmin,
+  updateJobApproval,
   getSystemStats,
-  createUser
+  createUser,
+  getAllUsers
 } = require('../controllers/adminController');
 const { authenticate, authorize } = require('../middleware/auth');
 
@@ -22,5 +23,8 @@ router.get('/stats', getSystemStats);
 
 // Create a new user
 router.post('/users', createUser);
+
+// Get all users
+router.get('/users', getAllUsers);
 
 module.exports = router;
