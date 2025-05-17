@@ -1,14 +1,16 @@
 const Application = require('../models/Application');
 const Job = require('../models/Job');
+const User = require('../models/User');
 const mongoose = require('mongoose');
+const path = require('path');
 
 // Apply for a job (applicant only)
 const applyForJob = async (req, res) => {
   try {
     const { jobId } = req.params;
-    const { resume, coverLetter } = req.body;
+    const { fullName, username, email, coverLetter } = req.body;
     const applicantId = req.user._id;
-    
+
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
       return res.status(400).json({
@@ -16,59 +18,73 @@ const applyForJob = async (req, res) => {
         status: false
       });
     }
-    
-    // Check if resume is provided
-    if (!resume) {
+
+    // Check if resume file was uploaded
+    if (!req.file) {
       return res.status(400).json({
-        message: "Resume is required for job application.",
+        message: "Resume file is required for job application.",
         status: false
       });
     }
-    
+
+    // Get resume file path
+    const resumePath = `/uploads/resumes/${req.file.filename}`;
+
+    // Validate required fields
+    if (!fullName || !username || !email) {
+      return res.status(400).json({
+        message: "Full name, username, and email are required for job application.",
+        status: false
+      });
+    }
+
     // Find job
     const job = await Job.findById(jobId);
-    
+
     if (!job) {
       return res.status(404).json({
         message: "Job not found.",
         status: false
       });
     }
-    
-    // Check if job is active
-    if (job.status !== 'active') {
+
+    // Check if job is active and approved
+    if (job.status !== 'active' || job.approvalStatus !== 'approved') {
       return res.status(400).json({
-        message: "This job is no longer accepting applications.",
+        message: "This job is not active or has not been approved yet.",
         status: false
       });
     }
-    
+
     // Check if already applied
     const existingApplication = await Application.findOne({
       job: jobId,
       applicant: applicantId
     });
-    
+
     if (existingApplication) {
       return res.status(400).json({
         message: "You have already applied for this job.",
         status: false
       });
     }
-    
+
     // Create application
     const application = new Application({
       job: jobId,
       applicant: applicantId,
       company: job.postedBy,
-      resume,
+      fullName,
+      username,
+      email,
+      resume: resumePath,
       coverLetter,
       status: 'pending',
       appliedDate: Date.now()
     });
-    
+
     await application.save();
-    
+
     // Update job applicants array
     await Job.findByIdAndUpdate(jobId, {
       $push: {
@@ -76,12 +92,12 @@ const applyForJob = async (req, res) => {
           applicant: applicantId,
           status: 'pending',
           appliedDate: Date.now(),
-          resume,
+          resume: resumePath,
           coverLetter
         }
       }
     });
-    
+
     res.status(201).json({
       message: "Application submitted successfully.",
       status: true,
@@ -101,7 +117,7 @@ const getJobApplications = async (req, res) => {
   try {
     const { jobId } = req.params;
     const companyId = req.user._id;
-    
+
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
       return res.status(400).json({
@@ -109,17 +125,17 @@ const getJobApplications = async (req, res) => {
         status: false
       });
     }
-    
+
     // Find job and check ownership
     const job = await Job.findById(jobId);
-    
+
     if (!job) {
       return res.status(404).json({
         message: "Job not found.",
         status: false
       });
     }
-    
+
     // Check if the user is the job poster
     if (job.postedBy.toString() !== companyId.toString()) {
       return res.status(403).json({
@@ -127,12 +143,12 @@ const getJobApplications = async (req, res) => {
         status: false
       });
     }
-    
+
     // Get applications
     const applications = await Application.find({ job: jobId })
       .populate('applicant', 'username email applicantProfile')
       .sort({ appliedDate: -1 });
-    
+
     res.status(200).json({
       status: true,
       count: applications.length,
@@ -151,13 +167,13 @@ const getJobApplications = async (req, res) => {
 const getApplicantApplications = async (req, res) => {
   try {
     const applicantId = req.user._id;
-    
+
     // Get applications
     const applications = await Application.find({ applicant: applicantId })
       .populate('job', 'jobTitle companyName jobLocation status')
       .populate('company', 'username companyProfile.companyName companyProfile.companyLogo')
       .sort({ appliedDate: -1 });
-    
+
     res.status(200).json({
       status: true,
       count: applications.length,
@@ -178,7 +194,7 @@ const updateApplicationStatus = async (req, res) => {
     const { applicationId } = req.params;
     const { status, notes } = req.body;
     const companyId = req.user._id;
-    
+
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(applicationId)) {
       return res.status(400).json({
@@ -186,7 +202,7 @@ const updateApplicationStatus = async (req, res) => {
         status: false
       });
     }
-    
+
     // Validate status
     const validStatuses = ['pending', 'reviewed', 'interviewed', 'offered', 'rejected'];
     if (!validStatuses.includes(status)) {
@@ -195,17 +211,17 @@ const updateApplicationStatus = async (req, res) => {
         status: false
       });
     }
-    
+
     // Find application
     const application = await Application.findById(applicationId);
-    
+
     if (!application) {
       return res.status(404).json({
         message: "Application not found.",
         status: false
       });
     }
-    
+
     // Check if the user is the company that posted the job
     if (application.company.toString() !== companyId.toString()) {
       return res.status(403).json({
@@ -213,23 +229,23 @@ const updateApplicationStatus = async (req, res) => {
         status: false
       });
     }
-    
+
     // Update application
     const updatedApplication = await Application.findByIdAndUpdate(
       applicationId,
-      { 
-        $set: { 
-          status, 
+      {
+        $set: {
+          status,
           notes: notes || application.notes,
-          updatedAt: Date.now() 
-        } 
+          updatedAt: Date.now()
+        }
       },
       { new: true, runValidators: true }
     ).populate('applicant', 'username email');
-    
+
     // Update job applicants array
     await Job.updateOne(
-      { 
+      {
         _id: application.job,
         'applicants.applicant': application.applicant
       },
@@ -239,7 +255,7 @@ const updateApplicationStatus = async (req, res) => {
         }
       }
     );
-    
+
     res.status(200).json({
       message: "Application status updated successfully.",
       status: true,
