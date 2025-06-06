@@ -4,7 +4,11 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Navbar from "./Components/Navbar"
 import Footer from "./Components/Footer"
+<<<<<<< HEAD
 import { AuthProvider } from './contexts/AuthContext'
+=======
+import "./Components/custom.css"
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
 
 function App() {
   const location = useLocation();

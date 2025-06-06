@@ -18,14 +18,41 @@ const Home = () => {
   // Fetch jobs on component mount
   useEffect(() => {
     setIsLoading(true)
-    fetch("http://localhost:5000/all-jobs")
+
+    // Try to use the new API endpoint first
+    fetch("http://localhost:5000/api/jobs")
       .then(res => res.json())
-      .then(data => {
-        setJobs(data)
-        setIsLoading(false)
+      .then(response => {
+        if (response.status) {
+          // Filter to only show approved jobs
+          setJobs(response.jobs.filter(job => job.approvalStatus === 'approved'))
+          setIsLoading(false)
+        } else {
+          // Fallback to legacy API
+          return fetch("http://localhost:5000/all-jobs")
+        }
       })
       .catch(error => {
-        console.error("Error fetching jobs:", error)
+        console.error("Error fetching jobs from new API:", error)
+        // Fallback to legacy API
+        return fetch("http://localhost:5000/all-jobs")
+      })
+      .then(res => {
+        if (res) return res.json()
+      })
+      .then(data => {
+        if (data) {
+          // For legacy API, add default approval status and filter
+          const jobsWithApproval = data.map(job => ({
+            ...job,
+            approvalStatus: job.approvalStatus || 'approved'
+          }))
+          setJobs(jobsWithApproval.filter(job => job.approvalStatus === 'approved'))
+          setIsLoading(false)
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching jobs from legacy API:", error)
         setIsLoading(false)
       })
   }, [])
@@ -246,12 +273,12 @@ const Home = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar Filters */}
-            <div className="sidebar">
+            <div className="lg:col-span-1">
               <Sidebar handleChanges={handleChanges} handleClick={handleClick} />
             </div>
 
             {/* Job Listings */}
-            <div className="lg:col-span-2 card p-6">
+            <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
               {isLoading ? (
                 <div className="flex justify-center items-center h-64">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-600"></div>
@@ -325,7 +352,7 @@ const Home = () => {
               <div className="card p-6">
                 <h3 className="text-lg font-bold mb-4">Featured Jobs</h3>
                 <div className="space-y-4">
-                  {jobs.slice(0, 3).map((job, index) => (
+                  {jobs.filter(job => job.approvalStatus === 'approved').slice(0, 3).map((job, index) => (
                     <Link key={index} to={`/job/${job._id}`} className="block p-4 border border-gray-100 rounded-lg hover:border-brand-500 transition-colors duration-200">
                       <div className="flex items-start">
                         <img src={job.companyLogo || 'https://via.placeholder.com/40'} alt={job.companyName} className="w-10 h-10 mr-3 object-contain" />
@@ -337,7 +364,7 @@ const Home = () => {
                               <i className="fas fa-map-marker-alt mr-1"></i> {job.jobLocation}
                             </span>
                             <span className="mx-2">•</span>
-                            <span>${job.minPrice}-${job.maxPrice}k</span>
+                            <span>${job.minPrice || job.minSalary || 0}-${job.maxPrice || job.maxSalary || 0}k</span>
                           </div>
                         </div>
                       </div>

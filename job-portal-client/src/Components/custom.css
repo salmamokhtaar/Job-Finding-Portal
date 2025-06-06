@@ -1,0 +1,164 @@
+/* Custom styles for sidebar filters and job detail page */
+
+/* Sidebar filter styling */
+.sidebar {
+  @apply bg-white rounded-lg shadow-md p-6 sticky top-24;
+  transition: all 0.3s ease;
+}
+
+.sidebar-label-container {
+  @apply flex items-center mb-2 cursor-pointer text-gray-700 hover:text-blue-600 transition-colors duration-200;
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  user-select: none;
+}
+
+/* Hide the default radio button */
+.sidebar-label-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Custom radio button (checkmark) */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: #eee;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  transition: all 0.2s ease;
+}
+
+/* On hover */
+.sidebar-label-container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When checked */
+.sidebar-label-container input:checked ~ .checkmark {
+  background-color: #2563EB;
+  border-color: #2563EB;
+}
+
+/* Checkmark indicator */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the indicator when checked */
+.sidebar-label-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.sidebar-label-container .checkmark:after {
+  left: 7px;
+  top: 3px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Filter buttons styling */
+.sidebar button {
+  @apply mr-2 mb-2 px-3 py-1 text-sm rounded-md border border-gray-300 transition-colors duration-200;
+}
+
+.sidebar button:hover {
+  @apply bg-blue-600 text-white border-blue-600;
+}
+
+.sidebar button.active {
+  @apply bg-blue-600 text-white border-blue-600;
+}
+
+/* Responsive sidebar */
+@media (max-width: 1024px) {
+  .sidebar {
+    @apply mb-8 sticky top-20;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    @apply p-4;
+  }
+}
+
+/* Job Detail Page Styling */
+.job-detail-container {
+  @apply max-w-screen-2xl container mx-auto xl:px-24 px-4 py-10;
+}
+
+.job-detail-header {
+  @apply mb-8;
+}
+
+.job-detail-title {
+  @apply text-3xl font-bold text-gray-900 mb-2;
+}
+
+.job-detail-meta {
+  @apply flex flex-wrap gap-4 mb-6;
+}
+
+.job-detail-meta-item {
+  @apply flex items-center text-gray-600;
+}
+
+.job-detail-meta-icon {
+  @apply mr-2 text-blue-600;
+}
+
+.job-detail-description {
+  @apply max-w-none mb-8 text-gray-700 leading-relaxed;
+}
+
+.job-detail-section {
+  @apply mb-8;
+}
+
+.job-detail-section-title {
+  @apply text-xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2;
+}
+
+.job-detail-apply {
+  @apply bg-white rounded-lg shadow-md p-6 mb-8;
+}
+
+.job-detail-apply-title {
+  @apply text-xl font-bold text-gray-900 mb-4;
+}
+
+.job-detail-apply-form {
+  @apply space-y-4;
+}
+
+.job-detail-apply-input {
+  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+}
+
+.job-detail-apply-button {
+  @apply w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200;
+}
+
+.job-detail-sections {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-6 mt-8;
+}
+
+.job-detail-section-card {
+  @apply bg-white rounded-lg shadow-md p-6 h-full;
+}

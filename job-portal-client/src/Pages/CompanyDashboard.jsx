@@ -20,21 +20,75 @@ const CompanyDashboard = () => {
 
     setUser(userData);
 
+<<<<<<< HEAD
     // Fetch company's jobs
     const fetchJobs = async () => {
+=======
+    // Fetch company's jobs and stats
+    const fetchCompanyData = async () => {
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
       try {
-        const response = await axios.get('http://localhost:5000/api/jobs/company/myjobs', {
-          headers: {
-            Authorization: `Bearer ${userData.token}`
+        setIsLoading(true);
+
+        // Try to use the new API endpoint first
+        try {
+          // Get company stats
+          const statsResponse = await axios.get('http://localhost:5000/api/company/stats', {
+            headers: {
+              Authorization: `Bearer ${userData.token}`
+            }
+          });
+
+          if (statsResponse.data.status) {
+            // Get company jobs
+            const jobsResponse = await axios.get('http://localhost:5000/api/company/jobs', {
+              headers: {
+                Authorization: `Bearer ${userData.token}`
+              }
+            });
+
+            if (jobsResponse.data.status) {
+              setJobs(jobsResponse.data.jobs);
+
+              // Set applicants from stats response
+              if (statsResponse.data.recentApplications) {
+                setApplicants(statsResponse.data.recentApplications);
+              }
+
+              setIsLoading(false);
+              return;
+            }
           }
+<<<<<<< HEAD
         });
 
         if (response.data.status) {
           setJobs(response.data.jobs);
 
           // Get applicants for each job
+=======
+        } catch (apiError) {
+          console.log('New API error:', apiError);
+          // Fall back to legacy API
+        }
+
+        // Fallback to legacy API
+        try {
+          // Get jobs
+          const legacyResponse = await axios.get(`http://localhost:5000/myJobs/${userData.email}`);
+
+          // Add default approval status for legacy API
+          const jobsWithApproval = legacyResponse.data.map(job => ({
+            ...job,
+            approvalStatus: job.approvalStatus || 'approved'
+          }));
+
+          setJobs(jobsWithApproval);
+
+          // Try to get applicants for each job
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
           let allApplicants = [];
-          for (const job of response.data.jobs) {
+          for (const job of legacyResponse.data) {
             try {
               const applicantsResponse = await axios.get(`http://localhost:5000/api/applications/jobs/${job._id}`, {
                 headers: {
@@ -51,6 +105,7 @@ const CompanyDashboard = () => {
           }
 
           setApplicants(allApplicants);
+<<<<<<< HEAD
         }
       } catch (error) {
         console.error('Error fetching company jobs:', error);
@@ -59,6 +114,8 @@ const CompanyDashboard = () => {
         try {
           const legacyResponse = await axios.get(`http://localhost:5001/myJobs/${userData.email}`);
           setJobs(legacyResponse.data);
+=======
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
         } catch (err) {
           console.error('Error fetching legacy jobs:', err);
         }
@@ -67,7 +124,11 @@ const CompanyDashboard = () => {
       }
     };
 
+<<<<<<< HEAD
     fetchJobs();
+=======
+    fetchCompanyData();
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
   }, [navigate]);
 
   const handleLogout = () => {
@@ -151,15 +212,47 @@ const CompanyDashboard = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-4">
             <div className="p-6 bg-white rounded-lg shadow-md">
               <div className="flex items-center">
                 <div className="p-3 mr-4 bg-blue-100 rounded-full">
                   <FaBriefcase className="text-2xl text-blue-600" />
                 </div>
                 <div>
-                  <p className="mb-2 text-sm font-medium text-gray-600">Active Jobs</p>
+                  <p className="mb-2 text-sm font-medium text-gray-600">Total Jobs</p>
                   <p className="text-3xl font-bold text-gray-700">{jobs.length}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="flex items-center">
+                <div className="p-3 mr-4 bg-yellow-100 rounded-full">
+                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-gray-600">Pending Approval</p>
+                  <p className="text-3xl font-bold text-gray-700">
+                    {jobs.filter(job => job.approvalStatus === 'pending').length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="flex items-center">
+                <div className="p-3 mr-4 bg-green-100 rounded-full">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-gray-600">Approved Jobs</p>
+                  <p className="text-3xl font-bold text-gray-700">
+                    {jobs.filter(job => job.approvalStatus === 'approved').length}
+                  </p>
                 </div>
               </div>
             </div>
@@ -190,15 +283,30 @@ const CompanyDashboard = () => {
                           <FaBriefcase className="text-blue-600" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-700">
-                            {job.jobTitle}
-                          </p>
+                          <div className="flex items-center">
+                            <p className="font-medium text-gray-700">
+                              {job.jobTitle}
+                            </p>
+                            <div className={`ml-2 px-2 py-1 text-xs rounded-full
+                              ${job.approvalStatus === 'approved' ? 'bg-green-100 text-green-800' :
+                                job.approvalStatus === 'rejected' ? 'bg-red-100 text-red-800' :
+                                'bg-yellow-100 text-yellow-800'}`}
+                            >
+                              {job.approvalStatus === 'approved' ? 'Approved' :
+                               job.approvalStatus === 'rejected' ? 'Rejected' : 'Pending'}
+                            </div>
+                          </div>
                           <p className="text-sm text-gray-500">
                             Location: {job.jobLocation} • Type: {job.employmentType}
                           </p>
                           <p className="text-sm text-gray-500">
-                            Posted: {new Date(job.postingDate || job.createAt).toLocaleDateString()}
+                            Posted: {new Date(job.postingDate || job.createdAt || Date.now()).toLocaleDateString()}
                           </p>
+                          {job.approvalStatus === 'rejected' && job.rejectionReason && (
+                            <p className="text-sm text-red-500 mt-1">
+                              Rejection reason: {job.rejectionReason}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <Link

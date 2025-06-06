@@ -2,14 +2,30 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const mongoose = require('mongoose');
 
-// Create a new job (company only)
+// Create a new job (company or admin)
 const createJob = async (req, res) => {
   try {
     const jobData = req.body;
+<<<<<<< HEAD
 
     // Add the company user ID as the poster
     jobData.postedBy = req.user._id;
 
+=======
+    const userRole = req.user.role;
+
+    // Add the user ID as the poster
+    jobData.postedBy = req.user._id;
+
+    // If the user is an admin, automatically approve the job
+    if (userRole === 'admin') {
+      jobData.approvalStatus = 'approved';
+    } else {
+      // For company users, set to pending by default
+      jobData.approvalStatus = 'pending';
+    }
+
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
     // Create new job
     const job = new Job(jobData);
     await job.save();
@@ -43,7 +59,14 @@ const getAllJobs = async (req, res) => {
     } = req.query;
 
     // Build query
+<<<<<<< HEAD
     const query = { status };
+=======
+    const query = {
+      status,
+      approvalStatus: 'approved' // Only show approved jobs to the public
+    };
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
 
     // Search by title or company
     if (search) {

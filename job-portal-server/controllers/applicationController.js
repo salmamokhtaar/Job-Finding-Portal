@@ -1,12 +1,14 @@
 const Application = require('../models/Application');
 const Job = require('../models/Job');
+const User = require('../models/User');
 const mongoose = require('mongoose');
+const path = require('path');
 
 // Apply for a job (applicant only)
 const applyForJob = async (req, res) => {
   try {
     const { jobId } = req.params;
-    const { resume, coverLetter } = req.body;
+    const { fullName, username, email, coverLetter } = req.body;
     const applicantId = req.user._id;
 
     // Validate ObjectId
@@ -17,14 +19,33 @@ const applyForJob = async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
     // Check if resume is provided
     if (!resume) {
+=======
+    // Check if resume file was uploaded
+    if (!req.file) {
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
       return res.status(400).json({
-        message: "Resume is required for job application.",
+        message: "Resume file is required for job application.",
         status: false
       });
     }
 
+<<<<<<< HEAD
+=======
+    // Get resume file path
+    const resumePath = `/uploads/resumes/${req.file.filename}`;
+
+    // Validate required fields
+    if (!fullName || !username || !email) {
+      return res.status(400).json({
+        message: "Full name, username, and email are required for job application.",
+        status: false
+      });
+    }
+
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
     // Find job
     const job = await Job.findById(jobId);
 
@@ -35,10 +56,15 @@ const applyForJob = async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
     // Check if job is active
     if (job.status !== 'active') {
+=======
+    // Check if job is active and approved
+    if (job.status !== 'active' || job.approvalStatus !== 'approved') {
+>>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
       return res.status(400).json({
-        message: "This job is no longer accepting applications.",
+        message: "This job is not active or has not been approved yet.",
         status: false
       });
     }
@@ -61,7 +87,10 @@ const applyForJob = async (req, res) => {
       job: jobId,
       applicant: applicantId,
       company: job.postedBy,
-      resume,
+      fullName,
+      username,
+      email,
+      resume: resumePath,
       coverLetter,
       status: 'pending',
       appliedDate: Date.now()
@@ -76,7 +105,7 @@ const applyForJob = async (req, res) => {
           applicant: applicantId,
           status: 'pending',
           appliedDate: Date.now(),
-          resume,
+          resume: resumePath,
           coverLetter
         }
       }

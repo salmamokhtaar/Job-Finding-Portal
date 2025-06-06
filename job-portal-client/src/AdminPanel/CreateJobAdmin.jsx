@@ -8,7 +8,7 @@ import SideNav from './SideNav'
 const CreateJobAdmin = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  
+
   // Form state
   const [jobData, setJobData] = useState({
     jobTitle: '',
@@ -38,17 +38,17 @@ const CreateJobAdmin = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     // Validate form
-    if (!jobData.jobTitle || !jobData.companyName || !jobData.minSalary || 
+    if (!jobData.jobTitle || !jobData.companyName || !jobData.minSalary ||
         !jobData.maxSalary || !jobData.jobLocation || !jobData.description) {
       toast.error('Please fill in all required fields')
       return
     }
-    
+
     try {
       setLoading(true)
-      
+
       // Format data for API
       const formattedData = {
         ...jobData,
@@ -57,21 +57,21 @@ const CreateJobAdmin = () => {
         requirements: jobData.requirements.split(',').map(req => req.trim()),
         skills: jobData.skills.split(',').map(skill => skill.trim())
       }
-      
+
       // Get user data for posting
       const userData = JSON.parse(localStorage.getItem('user'))
-      
-      // Add job post
+
+      // Use the working API endpoint directly
       const response = await axios.post('http://localhost:5000/post-job', {
         ...formattedData,
         postedBy: userData.email
       })
-      
+
       if (response.data) {
         toast.success('Job posted successfully!')
         setTimeout(() => {
-          navigate('/myjobs')
-        }, 2000)
+          navigate('/admin/jobs')
+        }, 1500)
       }
     } catch (error) {
       console.error('Error creating job:', error)
@@ -85,11 +85,11 @@ const CreateJobAdmin = () => {
     <div className="flex">
       {/* Side Navigation */}
       <SideNav />
-      
+
       {/* Main Content */}
       <div className="ml-[22%] w-full pr-8 py-8">
         <h1 className="text-3xl font-bold mb-8 text-blue-600">Create New Job Post</h1>
-        
+
         <div className="bg-white rounded-lg shadow-md p-6">
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -108,7 +108,7 @@ const CreateJobAdmin = () => {
                   required
                 />
               </div>
-              
+
               {/* Company Name */}
               <div>
                 <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -124,7 +124,7 @@ const CreateJobAdmin = () => {
                   required
                 />
               </div>
-              
+
               {/* Company Logo */}
               <div>
                 <label htmlFor="companyLogo" className="block text-sm font-medium text-gray-700 mb-1">
@@ -139,7 +139,7 @@ const CreateJobAdmin = () => {
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               {/* Job Location */}
               <div>
                 <label htmlFor="jobLocation" className="block text-sm font-medium text-gray-700 mb-1">
@@ -155,7 +155,7 @@ const CreateJobAdmin = () => {
                   required
                 />
               </div>
-              
+
               {/* Salary Range */}
               <div>
                 <label htmlFor="minSalary" className="block text-sm font-medium text-gray-700 mb-1">
@@ -171,7 +171,7 @@ const CreateJobAdmin = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="maxSalary" className="block text-sm font-medium text-gray-700 mb-1">
                   Maximum Salary *
@@ -186,7 +186,7 @@ const CreateJobAdmin = () => {
                   required
                 />
               </div>
-              
+
               {/* Salary Type */}
               <div>
                 <label htmlFor="salaryType" className="block text-sm font-medium text-gray-700 mb-1">
@@ -204,7 +204,7 @@ const CreateJobAdmin = () => {
                   <option value="yearly">Yearly</option>
                 </select>
               </div>
-              
+
               {/* Experience Level */}
               <div>
                 <label htmlFor="experienceLevel" className="block text-sm font-medium text-gray-700 mb-1">
@@ -223,7 +223,7 @@ const CreateJobAdmin = () => {
                   <option value="executive">Executive</option>
                 </select>
               </div>
-              
+
               {/* Employment Type */}
               <div>
                 <label htmlFor="employmentType" className="block text-sm font-medium text-gray-700 mb-1">
@@ -242,7 +242,7 @@ const CreateJobAdmin = () => {
                   <option value="internship">Internship</option>
                 </select>
               </div>
-              
+
               {/* Job Status */}
               <div>
                 <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
@@ -261,7 +261,7 @@ const CreateJobAdmin = () => {
                 </select>
               </div>
             </div>
-            
+
             {/* Job Description */}
             <div className="mt-6">
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
@@ -277,7 +277,7 @@ const CreateJobAdmin = () => {
                 required
               ></textarea>
             </div>
-            
+
             {/* Requirements */}
             <div className="mt-6">
               <label htmlFor="requirements" className="block text-sm font-medium text-gray-700 mb-1">
@@ -293,7 +293,7 @@ const CreateJobAdmin = () => {
                 placeholder="Bachelor's degree, 2+ years experience, etc."
               ></textarea>
             </div>
-            
+
             {/* Skills */}
             <div className="mt-6">
               <label htmlFor="skills" className="block text-sm font-medium text-gray-700 mb-1">
@@ -309,7 +309,7 @@ const CreateJobAdmin = () => {
                 placeholder="JavaScript, React, Node.js, etc."
               ></textarea>
             </div>
-            
+
             {/* Submit Button */}
             <div className="mt-8">
               <button
