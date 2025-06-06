@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const [user, setUser] = useState(null);
+    const { user, isAuthenticated, logout } = useAuth();
     const location = useLocation();
 
     // Handle scroll effect
@@ -21,23 +22,13 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Check for user on mount
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, [location]);
-
     const handleMenuOpen = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('user');
-        setUser(null);
-        // Redirect to home page
-        window.location.href = '/';
+        logout();
+        setIsMenuOpen(false);
     };
 
     const navItems = [
@@ -49,13 +40,15 @@ const Navbar = () => {
 
     // Dashboard link based on user role
     const getDashboardLink = () => {
-        if (!user) return "/login";
+        if (!isAuthenticated || !user) return "/login";
 
         switch(user.role) {
             case 'admin':
                 return "/dashboard";
             case 'company':
                 return "/company-dashboard";
+            case 'applicant':
+                return "/applicant-dashboard";
             default:
                 return "/applicant-dashboard";
         }
@@ -94,7 +87,7 @@ const Navbar = () => {
 
                     {/* Auth Buttons */}
                     <div className='hidden md:flex items-center gap-4'>
-                        {user ? (
+                        {isAuthenticated && user ? (
                             <div className="flex items-center gap-4">
                                 <Link
                                     to={getDashboardLink()}
@@ -155,7 +148,7 @@ const Navbar = () => {
                                 </li>
                             ))}
 
-                            {user ? (
+                            {isAuthenticated && user ? (
                                 <>
                                     <li>
                                         <Link

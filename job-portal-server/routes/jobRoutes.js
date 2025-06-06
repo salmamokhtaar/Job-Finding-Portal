@@ -1,31 +1,32 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  createJob, 
-  getAllJobs, 
-  getJobById, 
-  getCompanyJobs, 
-  updateJob, 
-  deleteJob 
+const {
+  createJob,
+  getAllJobs,
+  getJobById,
+  getCompanyJobs,
+  updateJob,
+  deleteJob,
+  getJobStats,
+  toggleJobStatus,
+  getJobApplications
 } = require('../controllers/jobController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate, authorize, authorizeOwnerOrAdmin } = require('../middleware/auth');
 
-// Create a new job (company only)
+// Public routes
+router.get('/', getAllJobs); // Get all active jobs with filters
+router.get('/:id', getJobById); // Get single job details
+
+// Company routes
 router.post('/', authenticate, authorize('company', 'admin'), createJob);
-
-// Get all jobs with filters
-router.get('/', getAllJobs);
-
-// Get job by ID
-router.get('/:id', getJobById);
-
-// Get jobs posted by company
-router.get('/company/myjobs', authenticate, authorize('company'), getCompanyJobs);
-
-// Update job (company only)
-router.put('/:id', authenticate, authorize('company'), updateJob);
-
-// Delete job (company or admin)
+router.get('/company/my-jobs', authenticate, authorize('company'), getCompanyJobs);
+router.put('/:id', authenticate, authorize('company', 'admin'), updateJob);
 router.delete('/:id', authenticate, authorize('company', 'admin'), deleteJob);
+router.patch('/:id/status', authenticate, authorize('company', 'admin'), toggleJobStatus);
+router.get('/:id/applications', authenticate, authorize('company', 'admin'), getJobApplications);
+
+// Admin routes
+router.get('/admin/stats', authenticate, authorize('admin'), getJobStats);
+router.get('/admin/all', authenticate, authorize('admin'), getAllJobs); // Get all jobs including inactive
 
 module.exports = router;

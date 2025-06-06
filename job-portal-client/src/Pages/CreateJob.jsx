@@ -28,10 +28,10 @@ import 'react-toastify/dist/ReactToastify.css';
   //     if(result.acknowledged === true){
   //       alert("Job Posted successfully")
   //       navigate("/sideNav")
-  //     } 
+  //     }
   //     reset()
   //   })
-    
+
   // }
 
 
@@ -44,7 +44,7 @@ import 'react-toastify/dist/ReactToastify.css';
     data.skills = selectedOption;
     // console.log(data)
     // from db mongodb atlas
-    fetch("http://localhost:5000/post-job",{
+    fetch("http://localhost:5001/post-job",{
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(data)
@@ -53,10 +53,10 @@ import 'react-toastify/dist/ReactToastify.css';
       if(result.acknowledged === true){
         alert("Job Posted successfully")
         navigate("/sideNav")
-      } 
+      }
       reset()
     })
-    
+
 }
 
 
@@ -73,7 +73,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
   return (
     <div className='max-w-screen mb-10 container mx-auto xl:px-24 px-4'>
-        
+
  <div className='bg-[#FAFAFA] px-4 py-10  lg:px-16'>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-5 '>
 
@@ -81,7 +81,7 @@ import 'react-toastify/dist/ReactToastify.css';
       <div className='create-job-flex'>
         <div className='lg:w1/2 w-full'>
           <label className='block mb-2 text-lg'>Job Title</label>
-      <input type="text" placeholder={"Web Developer"} 
+      <input type="text" placeholder={"Web Developer"}
       {...register("jobTitle")} className='create-job-input' />
         </div>
         <div className='lg:w1/2 w-full'>
@@ -95,7 +95,7 @@ import 'react-toastify/dist/ReactToastify.css';
       <div className='create-job-flex'>
         <div className='lg:w1/2 w-full'>
           <label className='block mb-2 text-lg'>Minimum Salary</label>
-      <input type="text" placeholder="$20k" 
+      <input type="text" placeholder="$20k"
       {...register("minPrice")} className='create-job-input'/>
 
         </div>
@@ -145,7 +145,7 @@ import 'react-toastify/dist/ReactToastify.css';
       </select>
 
         </div>
-      
+
 
           </div>
 
@@ -163,7 +163,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
           {/* sixthy */}
           <div className='create-job-flex'>
-        
+
         <div className='lg:w1/2 w-full'>
           <label className='block mb-2 text-lg'>Employment Type</label>
           <select {...register("employmentType")} className='create-job-input'>
@@ -173,14 +173,14 @@ import 'react-toastify/dist/ReactToastify.css';
         <option value="Temporary">Temp orary</option>
       </select>
         </div>
-      
+
 
           </div>
 
 {/* seventy */}
          <div className='w-full'>
          <label className='block mb-2 text-lg'>Job Description</label>
-         <textarea  
+         <textarea
          className='w-full pl-3 py-1.5 focus:outline-none placeholder:text-gray-700'
          rows={6}
          defaultValue={"Mollit in laborum tempor Lorem incididunt irure. Aute eu ex ad sunt. Pariatur sint culpa do incididunt eiusmod eiusmod culpa."}
@@ -194,10 +194,10 @@ import 'react-toastify/dist/ReactToastify.css';
 
          <div className='w-full'>
          <label className='block mb-2 text-lg'>Job Posted by</label>
-         <input 
+         <input
          type="email"
-          placeholder="your email" 
-      {...register("postedBy")} 
+          placeholder="your email"
+      {...register("postedBy")}
       className='create-job-input'/>
     </div>
       <input type="submit"  className='block mt-12 bg-blue-700 textwhite font-semibold px-8 py-2 roumded-sm cursor-pointer text-white'/>

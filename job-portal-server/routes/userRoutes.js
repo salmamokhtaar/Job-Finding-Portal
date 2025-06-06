@@ -1,27 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getAllUsers, 
-  getUserById, 
-  updateUserProfile, 
-  updateUser, 
-  deleteUser 
+const {
+  getAllUsers,
+  getUserById,
+  updateUserProfile,
+  updateUser,
+  deleteUser,
+  getUserStats,
+  toggleUserStatus,
+  changePassword
 } = require('../controllers/userController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate, authorize, authorizeOwnerOrAdmin } = require('../middleware/auth');
 
-// Get all users (admin only)
-router.get('/', authenticate, authorize('admin'), getAllUsers);
-
-// Get user by ID
-router.get('/:id', authenticate, getUserById);
-
-// Update user profile (own profile)
+// Public/Self routes
 router.put('/profile', authenticate, updateUserProfile);
+router.put('/change-password', authenticate, changePassword);
 
-// Update user (admin only)
+// Admin routes
+router.get('/', authenticate, authorize('admin'), getAllUsers);
+router.get('/admin/stats', authenticate, authorize('admin'), getUserStats);
+router.get('/:id', authenticate, authorize('admin'), getUserById);
 router.put('/:id', authenticate, authorize('admin'), updateUser);
-
-// Delete user (admin only)
 router.delete('/:id', authenticate, authorize('admin'), deleteUser);
+router.patch('/:id/status', authenticate, authorize('admin'), toggleUserStatus);
 
 module.exports = router;

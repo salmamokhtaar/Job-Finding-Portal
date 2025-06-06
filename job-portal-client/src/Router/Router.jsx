@@ -9,7 +9,7 @@ import JobDetail from "../Pages/JobDetail";
 import Dashboard from "../AdminPanel/Dashboard";
 import SingUp from "../AdminPanel/SingUp";
 import Login2 from "../AdminPanel/Login2";
-import AboutUs from "../Pages/AboutUs";
+import AboutUs from "../Pages/AboutUS";
 import Contact from "../Pages/Contact";
 import PrivateRoute from "../AdminPanel/PrivateRoute";
 import Users from "../Components/Users";
@@ -32,8 +32,8 @@ const router = createBrowserRouter([
         {path: "/contact", element:<Contact/>},
         {
           path: "/edit-job/:id",
-          element:<UpdateJob/>,
-          loader: ({params}) => fetch(`http://localhost:5000/all-jobs/${params.id}`)
+          element: <PrivateRoute requiredRoles={["company", "admin"]}><UpdateJob/></PrivateRoute>,
+          loader: ({params}) => fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/api/jobs/${params.id}`)
         },
 
         {
@@ -108,7 +108,7 @@ const router = createBrowserRouter([
     {
       path: "/edit-user/:id",
       element: <PrivateRoute requiredRole="admin"><UpdateUser/></PrivateRoute>,
-      loader: ({params}) => fetch(`http://localhost:5000/single/user/${params.id}`)
+      loader: ({params}) => fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/api/users/${params.id}`)
     },
     {
       path: "/admin/edit-user/:id",

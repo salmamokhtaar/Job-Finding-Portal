@@ -1,32 +1,40 @@
-import axios from 'axios'
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '../contexts/AuthContext';
 
 function Login2() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  const { login, loading, isAuthenticated, user } = useAuth()
+
+  const from = location.state?.from?.pathname || '/';
 
   // Check if user is already logged in
   useEffect(() => {
-    const user = localStorage.getItem('user')
-    if (user) {
-      const userData = JSON.parse(user)
-      if (userData.isAuthenticated) {
-        // Redirect based on user role
-        if (userData.role === 'admin') {
-          navigate("/dashboard")
-        } else if (userData.role === 'company') {
-          navigate("/company-dashboard")
-        } else {
-          navigate("/applicant-dashboard")
+    if (isAuthenticated && user) {
+      // Redirect based on user role
+      let redirectPath = from;
+
+      if (from === '/') {
+        switch(user.role) {
+          case 'admin':
+            redirectPath = '/dashboard';
+            break;
+          case 'company':
+            redirectPath = '/company-dashboard';
+            break;
+          case 'applicant':
+            redirectPath = '/applicant-dashboard';
+            break;
+          default:
+            redirectPath = '/';
         }
       }
+
+      navigate(redirectPath, { replace: true });
     }
 
     // Check for remembered credentials
@@ -36,26 +44,19 @@ function Login2() {
       setEmail(savedEmail)
       setRememberMe(true)
     }
-  }, [navigate])
+  }, [isAuthenticated, user, navigate, from])
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please enter both email and password");
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Try the new API endpoint first
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
-        email,
-        password
-      });
+      const result = await login({ email, password });
 
-      if (response.data.status === true) {
+      if (result.success) {
         // Handle remember me
         if (rememberMe) {
           localStorage.setItem('rememberedUser', JSON.stringify({ email }));
@@ -63,95 +64,10 @@ function Login2() {
           localStorage.removeItem('rememberedUser');
         }
 
-        // Store user data and token in localStorage
-        localStorage.setItem("user", JSON.stringify({
-          ...response.data.user,
-          token: response.data.token,
-          isAuthenticated: true
-        }));
-
-        toast.success("Login successful!");
-
-        // Redirect based on user role
-        const userRole = response.data.user.role;
-        if (userRole === 'admin') {
-          navigate("/dashboard");
-        } else if (userRole === 'company') {
-          navigate("/company-dashboard");
-        } else {
-          navigate("/applicant-dashboard");
-        }
+        // Navigation is handled by the useEffect hook above
       }
     } catch (error) {
-      console.log("New API error:", error);
-
-      try {
-        // Fallback to legacy API if new one fails
-        const legacyResponse = await axios.post('http://localhost:5000/user/login', {
-          email,
-          password
-        });
-
-        if (legacyResponse.data.status === false) {
-          toast.error("Email or password is incorrect");
-        } else {
-          // Handle remember me
-          if (rememberMe) {
-            localStorage.setItem('rememberedUser', JSON.stringify({ email }));
-          } else {
-            localStorage.removeItem('rememberedUser');
-          }
-
-          toast.success("Login successful!");
-
-          // Generate a mock token for legacy API (since it doesn't provide one)
-          const mockToken = btoa(`${email}:${Date.now()}`);
-
-          try {
-            // Fetch user details to get username and other info
-            const usersResponse = await axios.get('http://localhost:5000/get-user');
-            const users = usersResponse.data;
-            const currentUser = users.find(user => user.email === email);
-
-            if (currentUser) {
-              localStorage.setItem("user", JSON.stringify({
-                id: currentUser._id,
-                _id: currentUser._id,
-                username: currentUser.username,
-                email: email,
-                role: 'admin', // Default to admin for legacy users
-                token: mockToken,
-                isAuthenticated: true
-              }));
-            } else {
-              // If user details not found, store minimal info
-              localStorage.setItem("user", JSON.stringify({
-                email: email,
-                role: 'admin', // Default to admin for legacy users
-                token: mockToken,
-                isAuthenticated: true
-              }));
-            }
-
-            navigate("/dashboard");
-          } catch (err) {
-            console.error("Error fetching user details:", err);
-            // Store minimal info if user details fetch fails
-            localStorage.setItem("user", JSON.stringify({
-              email: email,
-              role: 'admin', // Default to admin for legacy users
-              token: mockToken,
-              isAuthenticated: true
-            }));
-            navigate("/dashboard");
-          }
-        }
-      } catch (legacyError) {
-        console.log("Legacy API error:", legacyError);
-        toast.error("Invalid credentials. Please try again.");
-      }
-    } finally {
-      setIsLoading(false);
+      console.error('Login error:', error);
     }
   };
 
@@ -231,9 +147,9 @@ function Login2() {
               <button
                 type="submit"
                 className="btn btn-primary w-full flex items-center justify-center"
-                disabled={isLoading}
+                disabled={loading}
               >
-                {isLoading ? (
+                {loading ? (
                   <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -286,7 +202,6 @@ function Login2() {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 }

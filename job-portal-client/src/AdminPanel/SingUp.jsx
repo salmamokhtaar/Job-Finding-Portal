@@ -40,7 +40,7 @@ function SingUp() {
         }
 
         // Try the new API endpoint first
-        axios.post('http://localhost:5000/api/auth/register', {
+        axios.post('http://localhost:5001/api/auth/register', {
             "username": username,
             "email": email,
             "password": password,
@@ -69,7 +69,7 @@ function SingUp() {
             console.log("New API error:", error);
 
             // Fallback to legacy API if new one fails
-            axios.post('http://localhost:5000/user/register', {
+            axios.post('http://localhost:5001/user/register', {
                 "username": username,
                 "email": email,
                 "password": password

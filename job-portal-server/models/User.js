@@ -23,6 +23,11 @@ const UserSchema = new mongoose.Schema({
     enum: ['applicant', 'company', 'admin'],
     default: 'applicant'
   },
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'pending'],
+    default: 'active'
+  },
   // Fields for applicant profile
   applicantProfile: {
     fullName: String,
@@ -73,7 +78,7 @@ const UserSchema = new mongoose.Schema({
 UserSchema.pre('save', async function(next) {
   // Only hash the password if it's modified or new
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

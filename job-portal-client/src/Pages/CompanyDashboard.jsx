@@ -17,9 +17,9 @@ const CompanyDashboard = () => {
       navigate('/login');
       return;
     }
-    
+
     setUser(userData);
-    
+
     // Fetch company's jobs
     const fetchJobs = async () => {
       try {
@@ -28,10 +28,10 @@ const CompanyDashboard = () => {
             Authorization: `Bearer ${userData.token}`
           }
         });
-        
+
         if (response.data.status) {
           setJobs(response.data.jobs);
-          
+
           // Get applicants for each job
           let allApplicants = [];
           for (const job of response.data.jobs) {
@@ -41,7 +41,7 @@ const CompanyDashboard = () => {
                   Authorization: `Bearer ${userData.token}`
                 }
               });
-              
+
               if (applicantsResponse.data.status) {
                 allApplicants = [...allApplicants, ...applicantsResponse.data.applications];
               }
@@ -49,15 +49,15 @@ const CompanyDashboard = () => {
               console.error(`Error fetching applicants for job ${job._id}:`, error);
             }
           }
-          
+
           setApplicants(allApplicants);
         }
       } catch (error) {
         console.error('Error fetching company jobs:', error);
-        
+
         // Fallback to legacy API
         try {
-          const legacyResponse = await axios.get(`http://localhost:5000/myJobs/${userData.email}`);
+          const legacyResponse = await axios.get(`http://localhost:5001/myJobs/${userData.email}`);
           setJobs(legacyResponse.data);
         } catch (err) {
           console.error('Error fetching legacy jobs:', err);
@@ -66,7 +66,7 @@ const CompanyDashboard = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchJobs();
   }, [navigate]);
 
@@ -120,7 +120,7 @@ const CompanyDashboard = () => {
             </Link>
           </div>
           <div className="px-6 py-4 border-t border-gray-200">
-            <button 
+            <button
               onClick={handleLogout}
               className="flex items-center w-full px-4 py-3 text-gray-600 rounded-md hover:bg-gray-100"
             >
@@ -201,8 +201,8 @@ const CompanyDashboard = () => {
                           </p>
                         </div>
                         <div>
-                          <Link 
-                            to={`/edit-job/${job._id}`} 
+                          <Link
+                            to={`/edit-job/${job._id}`}
                             className="px-3 py-1 text-sm text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50"
                           >
                             Edit
