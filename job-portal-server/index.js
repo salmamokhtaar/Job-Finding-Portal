@@ -1,11 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-<<<<<<< HEAD
 const rateLimit = require('express-rate-limit');
-=======
-const path = require('path');
->>>>>>> 3e55399fd15e9a63459b96bd40a32ea305e3bfae
 require('dotenv').config();
 
 // Import routes
@@ -13,9 +9,6 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const jobRoutes = require('./routes/jobRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const companyRoutes = require('./routes/companyRoutes');
-const applicantRoutes = require('./routes/applicantRoutes');
 
 // Initialize express app
 const app = express();
@@ -41,9 +34,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Serve static files from the uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // MongoDB Connection
 const uri = process.env.MONGODB_URI || `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@mern-job-portal-demo.sisdk6h.mongodb.net/jobPortal?retryWrites=true&w=majority`;
 
@@ -59,9 +49,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/company', companyRoutes);
-app.use('/api/applicant', applicantRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
